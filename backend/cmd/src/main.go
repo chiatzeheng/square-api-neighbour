@@ -6,10 +6,10 @@ import (
 	"log"
 	"os"
 
-	"database/sql"
-
 	"github.com/chiatzeheng/src/internal/routes" // Import your routes package
 	"github.com/joho/godotenv"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
 )
 
 func main() {
@@ -18,15 +18,12 @@ func main() {
 		log.Fatal("failed to load env", load)
 	}
 
-	// Open a connection to the database
-	db, err := sql.Open("mysql", os.Getenv("DSN"))
+	// Connect to PlanetScale database using DSN environment variable.
+	db, err := gorm.Open(mysql.Open(os.Getenv("DSN")), &gorm.Config{
+		DisableForeignKeyConstraintWhenMigrating: true,
+	})
 	if err != nil {
-		log.Fatal("failed to open db connection", err)
-	}
-
-	// Check if the connection is alive
-	if err = db.Ping(); err != nil {
-		log.Fatal("failed to ping db", err)
+		log.Fatalf("failed to connect to PlanetScale: %v", err)
 	}
 
 	// Set the db in the routes package
