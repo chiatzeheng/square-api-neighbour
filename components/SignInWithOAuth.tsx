@@ -1,10 +1,10 @@
 import React from "react";
-import { SafeAreaView, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
+import { SafeAreaView, Text, StyleSheet, TouchableOpacity } from "react-native";
 import * as WebBrowser from "expo-web-browser";
 import { useOAuth } from "@clerk/clerk-expo";
-import { useWarmUpBrowser } from "./useWarmUpBrowser";
-import { SvgXml } from "react-native-svg";
-import Toast from "@/utils/toast";
+import { useWarmUpBrowser } from "./hooks/useWarmUpBrowser";
+import { Image } from "expo-image";
+import { blurhash } from "@/utils/constants";
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -22,25 +22,27 @@ const SignIn = () => {
       if (createdSessionId) {
         // @ts-ignore
         setActive({ session: createdSessionId });
-        Toast.success("Success");
+    
       } else {
       }
     } catch (err) {
       console.error("OAuth error", err);
-      Toast.error("Something Went Wrong");
+
     }
   }, []);
 
   return (
-    <SafeAreaView style={styles.container}> 
+    <SafeAreaView style={styles.container}>
       <Image
-        source={require("@/assets/images/appicon.png")} // Your logo image
         style={styles.logo}
+        source={require('@/assets/images/appicon.png')}
+        placeholder={blurhash}
+        transition={1000}
       />
       <TouchableOpacity style={styles.button} onPress={onPress}>
         <Text style={styles.buttonText}>Sign in with Google</Text>
       </TouchableOpacity>
-      </SafeAreaView>
+    </SafeAreaView>
   );
 };
 

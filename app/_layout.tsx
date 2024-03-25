@@ -5,18 +5,16 @@ import {
 } from "@react-navigation/native";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
+import { View } from "react-native";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
-import { useColorScheme } from "@/components/useColorScheme";
+import { useColorScheme } from "@/components/hooks/useColorScheme";
 import Constants from "expo-constants";
-import React from "react";
-import { ClerkProvider } from "@clerk/clerk-expo";
+import { ClerkProvider, SignedIn, SignedOut } from "@clerk/clerk-expo";
 import * as SecureStore from "expo-secure-store";
-import {
-  QueryClient,
-  QueryClientProvider,
-} from "@tanstack/react-query";
-import { GestureHandlerRootView } from 'react-native-gesture-handler'
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import SignInWithOAuth from "@/components/SignInWithOAuth";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 const queryClient = new QueryClient();
 
@@ -73,26 +71,36 @@ function RootLayoutNav() {
   const colorScheme = useColorScheme();
 
   return (
-    <GestureHandlerRootView>
     <ClerkProvider
       publishableKey={Constants?.expoConfig?.extra?.clerkPublishableKey}
       tokenCache={tokenCache}
     >
       <QueryClientProvider client={queryClient}>
-        <ThemeProvider
-          value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
-        >
-          <Stack
-            screenOptions={{
-              headerShown: false,
-            }}
-          >
-            <Stack.Screen name="(auth)/login" />
-            <Stack.Screen name="(main)/dashboard" />
-          </Stack>
-        </ThemeProvider>
+        <SignedIn>
+          <GestureHandlerRootView>
+            <View style={{ height: "100%", width: "100%" }}>
+              <ThemeProvider
+                value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
+              >
+                <Stack
+                  screenOptions={{
+                    headerShown: false,
+                  }}
+                  initialRouteName="(main)/dashboard"
+                >
+                  <Stack.Screen name="(main)/dashboard" />
+                  <Stack.Screen name="(user)/[id]" />
+                  <Stack.Screen name="page/[id]" />
+                  {/* <Stack.Screen name="page/product"/> */}
+                </Stack>
+              </ThemeProvider>
+            </View>
+          </GestureHandlerRootView>
+        </SignedIn>
+        <SignedOut>
+          <SignInWithOAuth />
+        </SignedOut>
       </QueryClientProvider>
     </ClerkProvider>
-    </GestureHandlerRootView>
   );
 }

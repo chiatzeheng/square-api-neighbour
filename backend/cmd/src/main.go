@@ -1,35 +1,66 @@
-// main.go
-
 package main
 
 import (
+	"context"
+	"fmt"
 	"log"
+	"net/http"
 	"os"
+	"path/filepath"
+	"time"
 
-	"github.com/chiatzeheng/src/internal/routes" // Import your routes package
+	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/joho/godotenv"
-	"gorm.io/driver/mysql"
-	"gorm.io/gorm"
+	"github.com/rs/cors"
+
+	"github.com/chiatzeheng/src/internal/routes"
 )
 
 func main() {
-	load := godotenv.Load()
-	if load != nil {
-		log.Fatal("failed to load env", load)
-	}
-
-	// Connect to PlanetScale database using DSN environment variable.
-	db, err := gorm.Open(mysql.Open(os.Getenv("DSN")), &gorm.Config{
-		DisableForeignKeyConstraintWhenMigrating: true,
-	})
+	// Load environment variables from .env file
+	cwd, err := os.Getwd()
 	if err != nil {
-		log.Fatalf("failed to connect to PlanetScale: %v", err)
+		log.Fatal("Failed to get WD:", err)
+	}
+	envFilePath := filepath.Join(cwd, "..", "..", "..", ".env")
+	err = godotenv.Load(envFilePath)
+	if err != nil {
+		log.Fatal("Failed to load environment variables:", err)
 	}
 
-	// Set the db in the routes package
-	routes.SetDB(db)
+	// Get the DSN from the environment variable
+	dsn := os.Getenv("DSN")
+	if dsn == "" {
+		log.Fatal("DSN environment variable is not set")
+	}
 
-	// Get the router and run the server
-	r := routes.Router()
-	r.Run(":8080")
+	// Connect to the PostgreSQL database
+	ctx := context.Background()
+	pool, err := pgxpool.Connect(ctx, dsn)
+	if err != nil {
+		log.Fatal("failed to connect database", err)
+	}
+	defer pool.Close()
+
+	// Check if the database connection is working
+	var now time.Time
+	err = pool.QueryRow(ctx, "SELECT NOW()").Scan(&now)
+	if err != nil {
+		log.Fatal("failed to execute query", err)
+	}
+
+	// Set the database instance in the routes package
+	routes.SetDB(pool)
+
+	// Get the router from the routes package
+	router := routes.Router()
+
+	// Create a new CORS handler
+	handler := cors.Default().Handler(router)
+
+	url := os.Getenv("EXPO_PUBLIC_URL")
+
+	// Start the HTTP server
+	fmt.Println("Server is running on http://", url)
+	log.Fatal(http.ListenAndServe(url, handler))
 }
