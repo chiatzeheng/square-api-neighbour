@@ -20,16 +20,11 @@ func SetDB(database *pgxpool.Pool) {
 
 func Router() *http.ServeMux {
 	mux := http.NewServeMux()
-	mux.HandleFunc("/getProducts", getProducts)
-	mux.HandleFunc("/fetchBusinesses", fetchBusinesses)
-	mux.HandleFunc("/fetchLocations", fetchLocations)
-	mux.HandleFunc("/", lol)
+	mux.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) { w.Write([]byte("hello")) })
+	mux.HandleFunc("GET /getProducts", getProducts)
+	mux.HandleFunc("GET /fetchBusinesses", fetchBusinesses)
+	mux.HandleFunc("GET /fetchLocations", fetchBL)
 	return mux
-}
-
-func lol(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/")
-	json.NewEncoder(w).Encode("hello")
 }
 
 // getProducts handles the GET request to fetch products
@@ -41,7 +36,7 @@ func getProducts(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Execute the query with a context
-	rows, err := db.Query(context.Background(), "SELECT ProductID, Name, Description, Price, Category, BusinessID, IsVirtual FROM Product")
+	rows, err := db.Query(context.Background(), `SELECT * FROM "defaultdb"."Product"; `)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -51,7 +46,7 @@ func getProducts(w http.ResponseWriter, r *http.Request) {
 	var products []Product
 	for rows.Next() {
 		var p Product
-		err := rows.Scan(&p.ProductID, &p.Name, &p.Description, &p.Price, &p.Category, &p.BusinessID, &p.IsVirtual)
+		err := rows.Scan(&p.ProductID, &p.Name, &p.Description, &p.Price, &p.Category, &p.BusinessID, &p.Image)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -95,34 +90,42 @@ func fetchBusinesses(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(businesses)
 }
 
-func fetchLocations(w http.ResponseWriter, r *http.Request) {
-
+func fetchBL(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
-	rows, err := db.Query(context.Background(), `SELECT * FROM "defaultdb"."Location";`)
+
+	rows, err := db.Query(context.Background(), `select * from "defaultdb"."Location" l join "defaultdb"."Business" b ON b."BusinessID" = l."LocationID";`)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	defer rows.Close()
 
-	var location []Location
+	type BusinessLocation struct {
+		Location
+		Business
+	}
+
+	var businessLocations []BusinessLocation
+
 	for rows.Next() {
+		var bl BusinessLocation
 		var l Location
-		err := rows.Scan(&l.LocationID, &l.Latitude, &l.Longitude, &l.LatitudeDelta, &l.LongitudeDelta)
+		var b Business
+		err := rows.Scan(&l.LocationID, &l.Latitude, &l.Longitude, &l.LatitudeDelta, &l.LongitudeDelta, &b.BusinessID, &b.Name, &b.Description, &b.Category, &b.SquareAccountID, &b.Image)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		location = append(location, l)
+		bl.Location = l
+		bl.Business = b
+		businessLocations = append(businessLocations, bl)
 	}
 
-	// Convert the businesses to JSON and send the response
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(location)
-
+	json.NewEncoder(w).Encode(businessLocations)
 }
 
 // Define the Product struct
@@ -136,6 +139,7 @@ type User struct {
 
 type Business struct {
 	BusinessID      int    `json:"businessID"`
+	Image           string `json:"image"`
 	Name            string `json:"name"`
 	Description     string `json:"description"`
 	Category        string `json:"category"`
@@ -172,12 +176,12 @@ type ARBusiness struct {
 
 type Product struct {
 	ProductID   int     `json:"productID"`
+	Image       string  `json:"image"`
 	Name        string  `json:"name"`
 	Description string  `json:"description"`
 	Price       float64 `json:"price"`
 	Category    string  `json:"category"`
 	BusinessID  int     `json:"businessID"`
-	IsVirtual   bool    `json:"isVirtual"`
 }
 
 type Transaction struct {

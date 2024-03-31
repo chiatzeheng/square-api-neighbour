@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { useAuth, useUser } from "@clerk/clerk-expo";
 import { Image } from "expo-image";
 import { blurhash } from "@/utils/constants";
-import { useNavigation } from "@react-navigation/native";
+import { Link, useNavigation } from "@react-navigation/native";
 
 const ProfileScreen = () => {
   const { user } = useUser();
@@ -34,7 +34,9 @@ const ProfileScreen = () => {
           {user?.primaryEmailAddress?.emailAddress}
         </Text>
         <Text style={styles.divider}></Text>
-        <Text style={styles.additionalInfo}>Apply for a Business?</Text>
+        <Link to="/(business)/main.tsx">
+         <Text style={styles.additionalInfo}>Apply for a Business?</Text>
+        </Link>
       </View>
 
       <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>

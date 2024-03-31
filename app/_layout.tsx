@@ -86,12 +86,12 @@ function RootLayoutNav() {
                   screenOptions={{
                     headerShown: false,
                   }}
-                  initialRouteName="(main)/dashboard"
+                  initialRouteName="index"
                 >
-                  <Stack.Screen name="(main)/dashboard" />
+                  <Stack.Screen name="index" />
                   <Stack.Screen name="(user)/[id]" />
-                  <Stack.Screen name="page/[id]" />
-                  {/* <Stack.Screen name="page/product"/> */}
+                  <Stack.Screen name="(page)/[id]" />
+                  <Stack.Screen name="(business)/main" />
                 </Stack>
               </ThemeProvider>
             </View>

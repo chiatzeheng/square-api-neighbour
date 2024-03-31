@@ -14,6 +14,7 @@ export interface User {
 
 export interface Business {
   businessID: number;
+  image: string;
   name: string;
   description: string;
   category: string;
@@ -49,7 +50,7 @@ export interface ARBusiness {
 }
 
 export interface Product {
-  productID: number;
+  id: number;
   name: string;
   description: string;
   price: number;

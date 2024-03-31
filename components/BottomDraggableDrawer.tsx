@@ -1,12 +1,40 @@
 import React, { useCallback, useRef, useMemo } from "react";
 import { StyleSheet, View, Text } from "react-native";
 import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
-import Carousell from "@/components/Carousell";
+import Carousel from "@/components/Carousel";
+import { useQuery } from "@tanstack/react-query";
+import axios from "axios";
 
 const App = () => {
   // hooks
   const sheetRef = useRef<BottomSheet>(null);
-  const snapPoints = useMemo(() => ["20%", "70%"], []);
+  const snapPoints = useMemo(() => ["20%", "60%"], []);
+
+  const query1 = useQuery({
+    queryKey: ['products'],
+    queryFn: async () => {
+      try {
+        const res = await axios.get(`http://${process.env.EXPO_PUBLIC_URL}/getProducts`);
+        return res.data;
+      } catch (error) {
+        console.log(error);
+      }
+    }
+  })
+
+  const query2 = useQuery({
+    queryKey: ['businesses'],
+    queryFn: async () => {
+      try {
+        const res = await axios.get(`http://${process.env.EXPO_PUBLIC_URL}/fetchBusinesses`);
+        return res.data;
+        console.log(res.data)
+      } catch (error) {
+        console.log(error);
+      }
+    }
+  })
+
 
   // callbacks
   const handleSheetChange = useCallback((index: number) => {
@@ -28,7 +56,15 @@ const App = () => {
           Connect with your neighbors, discover local events, and share
           community updates.
         </Text>
-        <Carousell />
+        <Carousel data={query1.data}/>
+        <Text style={styles.headingText}>
+          View Products 
+        </Text>
+        <Text style={styles.subheadingText}>
+          Connect with your neighbors, discover local events, and share
+          community updates.
+        </Text>
+        <Carousel data={query2.data} />
       </BottomSheetScrollView>
     </BottomSheet>
   );

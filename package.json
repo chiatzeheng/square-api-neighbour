@@ -8,7 +8,8 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "test": "jest --watchAll",
-    "ts:check": "tsc"
+    "ts:check": "tsc",
+    "every": "npx expo start && cd backend/cmd/src && go run main.go "
   },
   "jest": {
     "preset": "jest-expo"
@@ -25,6 +26,7 @@
     "expo-constants": "~15.4.5",
     "expo-dev-client": "~3.3.11",
     "expo-font": "~11.10.3",
+    "expo-gl": "^13.6.0",
     "expo-image": "~1.10.6",
     "expo-linking": "~6.2.2",
     "expo-location": "~16.5.5",
@@ -34,6 +36,7 @@
     "expo-splash-screen": "~0.26.4",
     "expo-status-bar": "~1.11.1",
     "expo-system-ui": "~2.9.3",
+    "expo-three": "^7.0.0",
     "expo-web-browser": "~12.8.2",
     "react": "18.2.0",
     "react-dom": "18.2.0",
@@ -46,7 +49,8 @@
     "react-native-screens": "~3.29.0",
     "react-native-svg": "14.1.0",
     "react-native-toast-message": "^2.2.0",
-    "react-native-web": "~0.19.6"
+    "react-native-web": "~0.19.6",
+    "three": "^0.163.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

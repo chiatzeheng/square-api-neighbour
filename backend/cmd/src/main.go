@@ -11,7 +11,6 @@ import (
 
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/joho/godotenv"
-	"github.com/rs/cors"
 
 	"github.com/chiatzeheng/src/internal/routes"
 )
@@ -56,11 +55,14 @@ func main() {
 	router := routes.Router()
 
 	// Create a new CORS handler
-	handler := cors.Default().Handler(router)
-
 	url := os.Getenv("EXPO_PUBLIC_URL")
 
+	server := http.Server{
+		Addr:    ":8080",
+		Handler: router,
+	}
+
 	// Start the HTTP server
-	fmt.Println("Server is running on http://", url)
-	log.Fatal(http.ListenAndServe(url, handler))
+	fmt.Println("Server is running on", url)
+	server.ListenAndServe()
 }
