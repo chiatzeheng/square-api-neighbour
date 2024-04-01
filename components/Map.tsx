@@ -16,7 +16,7 @@ const GlobalMapView = () => {
     queryFn: async () => {
       try {
         const res = await axios.get(
-          `http://${process.env.EXPO_PUBLIC_URL}/fetchLocations`
+          `http://${process.env.EXPO_PUBLIC_URL}:8080/fetchLocations`
         );
         return res.data;
       } catch (error) {

@@ -14,19 +14,18 @@ const App = () => {
     queryKey: ['products'],
     queryFn: async () => {
       try {
-        const res = await axios.get(`http://${process.env.EXPO_PUBLIC_URL}/getProducts`);
+        const res = await axios.get(`http://${process.env.EXPO_PUBLIC_URL}:8080/getProducts`);
         return res.data;
       } catch (error) {
         console.log(error);
       }
     }
   })
-
   const query2 = useQuery({
     queryKey: ['businesses'],
     queryFn: async () => {
       try {
-        const res = await axios.get(`http://${process.env.EXPO_PUBLIC_URL}/fetchBusinesses`);
+        const res = await axios.get(`http://${process.env.EXPO_PUBLIC_URL}:8080/fetchBusinesses`);
         return res.data;
         console.log(res.data)
       } catch (error) {

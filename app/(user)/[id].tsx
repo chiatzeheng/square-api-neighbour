@@ -34,7 +34,7 @@ const ProfileScreen = () => {
           {user?.primaryEmailAddress?.emailAddress}
         </Text>
         <Text style={styles.divider}></Text>
-        <Link to="/(business)/main.tsx">
+        <Link to="/main">
          <Text style={styles.additionalInfo}>Apply for a Business?</Text>
         </Link>
       </View>
