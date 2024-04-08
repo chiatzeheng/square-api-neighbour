@@ -25,6 +25,7 @@ const GlobalMapView = () => {
     },
   });
 
+
   const focusMap = () => {
     const initialRegion = {
       latitude: 37.78825,

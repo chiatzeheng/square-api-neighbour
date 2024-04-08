@@ -92,6 +92,7 @@ function RootLayoutNav() {
                   <Stack.Screen name="(user)/[id]" />
                   <Stack.Screen name="(page)/[id]" />
                   <Stack.Screen name="main" />
+                  <Stack.Screen name="(page)/location" />
                 </Stack>
               </ThemeProvider>
             </View>

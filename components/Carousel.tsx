@@ -8,20 +8,12 @@ interface Props {
 }
 
 const Carousel = ({ data }: Props) => {
+
   const uniqueKeyExtractor = (item: Product | Business, index: number) => {
-    // Check if the item has a unique identifier
     if ('id' in item && item.id !== undefined) {
       return item.id.toString();
     }
-
-    // If no unique identifier, combine multiple properties or use index as a fallback
-    const identifiers = [
-      item.name,
-      item.businessID?.toString(),
-      item.category,
-      index.toString(),
-    ];
-    return identifiers.filter(Boolean).join('-');
+    return `${index}`;
   };
 
   return (

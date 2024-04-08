@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"net"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -15,34 +14,6 @@ import (
 
 	"github.com/chiatzeheng/src/internal/routes"
 )
-
-func printNetworkInfo() {
-	ifaces, err := net.Interfaces()
-	if err != nil {
-		log.Println("Failed to get network interfaces:", err)
-		return
-	}
-
-	for _, iface := range ifaces {
-		addrs, err := iface.Addrs()
-		if err != nil {
-			log.Printf("Failed to get addresses for interface %s: %v", iface.Name, err)
-			continue
-		}
-
-		for _, addr := range addrs {
-			var ip net.IP
-			switch v := addr.(type) {
-			case *net.IPNet:
-				ip = v.IP
-			case *net.IPAddr:
-				ip = v.IP
-			}
-
-			fmt.Printf("Interface: %s, Address: %s\n", iface.Name, ip)
-		}
-	}
-}
 
 func main() {
 	// Load environment variables from .env file
@@ -91,6 +62,8 @@ func main() {
 	}
 
 	fmt.Println("Server is running")
-	printNetworkInfo()
-	server.ListenAndServe()
+	if err := server.ListenAndServe(); err != nil {
+		log.Fatalf("failed to serve: %v", err)
+	}
+
 }

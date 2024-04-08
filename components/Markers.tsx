@@ -20,13 +20,17 @@ export const Markers = ({ data }: { data: Location & Business }) => {
     >
       <Callout onPress={() => calloutPressed(data)}>
         <View style={styles.container}>
-          <Image source={{uri: data.image}} style={styles.image} />
+          {data.image && (
+            <Image source={{ uri: data.image }} style={styles.image} />
+          )}
           <View style={styles.textContainer}>
             <Text style={styles.name}>{data.name}</Text>
             <Text style={styles.category}>{data.category}</Text>
-            <Text style={styles.description}>
-              {data.description}
-            </Text>
+            <View style={styles.descriptionContainer}>
+              <Text style={styles.description} numberOfLines={3}>
+                {data.description}
+              </Text>
+            </View>
           </View>
         </View>
       </Callout>
@@ -36,7 +40,10 @@ export const Markers = ({ data }: { data: Location & Business }) => {
 
 const styles = StyleSheet.create({
   container: {
+    flexDirection: "row",
     padding: 10,
+    justifyContent: "center",
+    alignItems: "center",
     maxWidth: "100%", // Adjust this value as needed
   },
   textContainer: {
@@ -47,6 +54,7 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     resizeMode: "cover",
+    borderRadius: 8,
   },
   name: {
     fontSize: 16,
@@ -56,10 +64,13 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "gray",
   },
+  descriptionContainer: {
+    flex: 1,
+    marginTop: 4,
+  },
   description: {
     fontSize: 14,
-    marginTop: 4,
-    maxWidth: "100%", // Adjust this value as needed
-    flexShrink: 1,
+    maxWidth: 200, // Adjust this value as needed
+    overflow: "hidden",
   },
 });
