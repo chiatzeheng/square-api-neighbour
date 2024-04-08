@@ -55,14 +55,15 @@ func main() {
 	router := routes.Router()
 
 	// Create a new CORS handler
-	url := os.Getenv("EXPO_PUBLIC_URL")
 
 	server := http.Server{
 		Addr:    ":8080",
 		Handler: router,
 	}
 
-	// Start the HTTP server
-	fmt.Println("Server is running on", url)
-	server.ListenAndServe()
+	fmt.Println("Server is running")
+	if err := server.ListenAndServe(); err != nil {
+		log.Fatalf("failed to serve: %v", err)
+	}
+
 }

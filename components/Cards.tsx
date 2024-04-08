@@ -1,5 +1,5 @@
 import React from "react";
-import { View,  StyleSheet, Dimensions, Text, Image, } from "react-native";
+import { View, StyleSheet, Dimensions, Text, Image } from "react-native";
 import { Link } from "expo-router";
 
 const { width } = Dimensions.get("window");
@@ -7,44 +7,56 @@ const cardWidth = width * 0.8;
 
 const Cards = ({ item }: any) => {
 
-
   return (
     <View style={styles.cardContainer}>
-      {item?.title ? (
-        <Link href="/(page)/[id].tsx">
-          {/* <Image source={{ uri: item.image }} style={styles.cardImage} /> */}
-          <Text style={styles.cardTitle}>{item.title}</Text>
-        </Link>
-      ) : (
-          <Link href="/(page)/[id].tsx">
-          {/* <Image source={{ uri: item.image }} style={styles.cardImage} /> */}
+      <Link href={`/(page)/${item.id}.tsx`}>
+        {item.image && (
+          <Image source={{ uri: item.image }} style={styles.cardImage} />
+        )}
+        <View style={styles.textContainer}>
           <Text style={styles.cardTitle}>{item.name}</Text>
-          <Text style={styles.cardTitle}>{item.category}</Text>
-        </Link>
-      )}
+          <Text style={styles.cardCategory}>{item.category}</Text>
+          <Text style={styles.cardDescription}>{item.description}</Text>
+        </View>
+      </Link>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   cardContainer: {
-    width: cardWidth,
-    marginHorizontal: 8,
+    width: 300,
+    marginHorizontal: 25,
     alignItems: "center",
-    backgroundColor: "grey",
+    backgroundColor: "white",
     borderRadius: 8,
     elevation: 4,
     padding: 16,
   },
   cardImage: {
-    width: "100%",
+    width: 250,
     height: 200,
     borderRadius: 8,
+  },
+  textContainer: {
+    alignItems: "center", // Added to center the text
   },
   cardTitle: {
     fontSize: 18,
     fontWeight: "bold",
     marginTop: 16,
+    textAlign: "center", // Added to center the text
+  },
+  cardCategory: {
+    fontSize: 16,
+    marginTop: 8,
+    textAlign: "center", // Added to center the text
+  },
+  cardDescription: {
+    fontSize: 14,
+    marginTop: 8,
+    color: "gray",
+    textAlign: "center", // Added to center the text
   },
 });
 

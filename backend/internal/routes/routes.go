@@ -36,7 +36,8 @@ func getProducts(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Execute the query with a context
-	rows, err := db.Query(context.Background(), `SELECT * FROM "defaultdb"."Product"; `)
+	rows, err := db.Query(context.Background(), `SELECT * FROM "defaultdb"."product"; `)
+
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -67,7 +68,7 @@ func fetchBusinesses(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Fetch businesses from the database
-	rows, err := db.Query(context.Background(), `SELECT "BusinessID", "Name", "Description", "Category", "SquareAccountID" FROM "defaultdb"."Business";`)
+	rows, err := db.Query(context.Background(), `SELECT "businessid", "name", "image", "description", "category" FROM "defaultdb"."Business";`)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -77,7 +78,7 @@ func fetchBusinesses(w http.ResponseWriter, r *http.Request) {
 	var businesses []Business
 	for rows.Next() {
 		var b Business
-		err := rows.Scan(&b.BusinessID, &b.Name, &b.Description, &b.Category, &b.SquareAccountID)
+		err := rows.Scan(&b.BusinessID, &b.Name, &b.Image, &b.Description, &b.Category)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -96,7 +97,7 @@ func fetchBL(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	rows, err := db.Query(context.Background(), `select * from "defaultdb"."Location" l join "defaultdb"."Business" b ON b."BusinessID" = l."LocationID";`)
+	rows, err := db.Query(context.Background(), `SELECT * FROM "defaultdb"."Location" l JOIN "defaultdb"."Business" b ON b."businessid" = l."locationid";`)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -114,7 +115,7 @@ func fetchBL(w http.ResponseWriter, r *http.Request) {
 		var bl BusinessLocation
 		var l Location
 		var b Business
-		err := rows.Scan(&l.LocationID, &l.Latitude, &l.Longitude, &l.LatitudeDelta, &l.LongitudeDelta, &b.BusinessID, &b.Name, &b.Description, &b.Category, &b.SquareAccountID, &b.Image)
+		err := rows.Scan(&l.LocationID, &l.Latitude, &l.Longitude, &l.LatitudeDelta, &l.LongitudeDelta, &b.BusinessID, &b.Image, &b.Name, &b.Description, &b.Category)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -128,26 +129,16 @@ func fetchBL(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(businessLocations)
 }
 
-// Define the Product struct
-
-type User struct {
-	UserID int    `json:"userID"`
-	Name   string `json:"name"`
-	Email  string `json:"email"`
-	// Add additional user fields as needed
-}
-
 type Business struct {
-	BusinessID      int    `json:"businessID"`
-	Image           string `json:"image"`
-	Name            string `json:"name"`
-	Description     string `json:"description"`
-	Category        string `json:"category"`
-	SquareAccountID string `json:"squareAccountID"`
+	BusinessID  string `json:"businessID"`
+	Image       string `json:"image"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Category    string `json:"category"`
 }
 
 type Location struct {
-	LocationID     int     `json:"locationID"`
+	LocationID     string  `json:"locationID"`
 	Latitude       float64 `json:"latitude"`
 	Longitude      float64 `json:"longitude"`
 	LatitudeDelta  float64 `json:"latitudeDelta"`
@@ -155,39 +146,39 @@ type Location struct {
 }
 
 type AR struct {
-	ARID        int       `json:"arID"`
+	ARID        string    `json:"arID"`
 	Name        string    `json:"name"`
 	Description string    `json:"description"`
 	Category    string    `json:"category"`
-	CreatorID   int       `json:"creatorID"`
+	CreatorID   string    `json:"creatorID"`
 	CreatedDate time.Time `json:"createdDate"`
 }
 
 type ARExperienceData struct {
-	ARID  int    `json:"arID"`
+	ARID  string `json:"arID"`
 	Key   string `json:"key"`
 	Value string `json:"value"`
 }
 
 type ARBusiness struct {
-	ARID       int `json:"arID"`
-	BusinessID int `json:"businessID"`
+	ARID       string `json:"arID"`
+	BusinessID string `json:"businessID"`
 }
 
 type Product struct {
-	ProductID   int     `json:"productID"`
+	ProductID   string  `json:"productID"`
 	Image       string  `json:"image"`
 	Name        string  `json:"name"`
 	Description string  `json:"description"`
 	Price       float64 `json:"price"`
 	Category    string  `json:"category"`
-	BusinessID  int     `json:"businessID"`
+	BusinessID  string  `json:"businessID"`
 }
 
 type Transaction struct {
-	TransactionID   int       `json:"transactionID"`
-	UserID          int       `json:"userID"`
-	ProductID       int       `json:"productID"`
+	TransactionID   string    `json:"transactionID"`
+	UserID          string    `json:"userID"`
+	ProductID       string    `json:"productID"`
 	TransactionDate time.Time `json:"transactionDate"`
 	Amount          float64   `json:"amount"`
 	PaymentMethod   string    `json:"paymentMethod"`
@@ -195,15 +186,15 @@ type Transaction struct {
 }
 
 type TransactionBusiness struct {
-	TransactionID int `json:"transactionID"`
-	BusinessID    int `json:"businessID"`
+	TransactionID string `json:"transactionID"`
+	BusinessID    string `json:"businessID"`
 }
 
 type Content struct {
-	ContentID   int       `json:"contentID"`
+	ContentID   string    `json:"contentID"`
 	ContentType string    `json:"contentType"`
-	UserID      int       `json:"userID"`
-	BusinessID  int       `json:"businessID"`
+	UserID      string    `json:"userID"`
+	BusinessID  string    `json:"businessID"`
 	Content     string    `json:"content"`
 	CreatedDate time.Time `json:"createdDate"`
 }
