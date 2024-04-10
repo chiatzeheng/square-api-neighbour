@@ -7,21 +7,22 @@ import {
   Text,
   ScrollView,
   KeyboardAvoidingView,
+  ActivityIndicator,
 } from "react-native";
 import { Image } from "expo-image";
-import { useForm, Controller } from "react-hook-form";
+import { useForm, Controller, useFormState } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import "react-native-get-random-values";
 import { Feather } from "@expo/vector-icons";
+import * as FileSystem from "expo-file-system";
 import * as ImagePicker from "expo-image-picker";
 import { v4 as uuidv4 } from "uuid";
 import axios from "axios";
-import { router } from "expo-router";
 import { useMutation } from "@tanstack/react-query";
 import { Business } from "@/utils/type";
-import * as FileSystem from "expo-file-system";
 import { s3 } from "@/utils/bucket";
+import { useRouter } from "expo-router";
 
 const schema = z.object({
   name: z.string().min(1).max(255),
@@ -29,46 +30,46 @@ const schema = z.object({
   category: z.string().min(1),
 });
 
+function extractImageUrl(localUri: string) {
+  const pattern = /file:\/\/\/var\/.*?\.jpg/g;
+  const matches = localUri.match(pattern);
+  if (matches && matches.length > 0) {
+    return matches[0];
+  } else {
+    return null;
+  }
+}
+
+
 const NewBusinessForm = () => {
   const {
     control,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitting, isSubmitSuccessful },
   } = useForm({
     resolver: zodResolver(schema),
   });
 
-  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
   const [image, setImage] = useState<string>();
 
   const { mutate } = useMutation({
-    mutationFn: (data: Business) => axios.post("/business", { data }),
+    mutationFn: (data: Business) =>
+      axios.post(
+        `http://${process.env.EXPO_PUBLIC_URL}:8080/postBusiness`,
+        data
+      ),
     onError: (error) => {
       console.log(error);
     },
-    onSuccess(data) {},
+    onSuccess(res) {
+      router.push({
+        pathname: "/(page)/location",
+        params: { id: res.data.businessID },
+      });
+    },
   });
-
-  //USEFUL FOR MULTIPLE IMAGES
-  //   const pickImage = async () => {
-  //     let result = await ImagePicker.launchImageLibraryAsync({
-  //       mediaTypes: ImagePicker.MediaTypeOptions.All,
-  //       allowsEditing: true,
-  //       aspect: [4, 3],
-  //       quality: 1,
-  //     });
-
-  //     if (!result.canceled) {
-  //       setImages([...images, result.assets[0].uri]);
-  //     }
-  //   };
-
-  // const removeImage = (index: number) => {
-  //     const updatedImages = [...images];
-  //     updatedImages.splice(index, 1);
-  //     setImages(updatedImages);
-  //   };
-
+  
   const pickImage = async () => {
     // No permissions request is necessary for launching the image library
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -85,21 +86,25 @@ const NewBusinessForm = () => {
 
   const uploadImageToS3 = async (localUri: string) => {
     try {
-      const base64Image = await FileSystem.readAsStringAsync(localUri, {
+      let imageUrl = extractImageUrl(localUri);
+      if (!imageUrl) {
+        throw new Error("Invalid image URL");
+      }
+
+      let imageurl = extractImageUrl(localUri);
+      const { uri } = await FileSystem.getInfoAsync(imageUrl);
+      const file = await FileSystem.readAsStringAsync(uri, {
         encoding: FileSystem.EncodingType.Base64,
       });
-  
+
       const params = {
         Bucket: process.env.EXPO_PUBLIC_BUCKET || "",
         Key: uuidv4(),
-        Body: base64Image, // Directly use the base64-encoded image string
-        ContentType: "image/jpeg", // specify content type if necessary
+        Body: file,
       };
 
-      console.log(params)
-  
       const data = await s3.upload(params).promise();
-  
+
       const uploadedImageUrl = data.Location;
       return uploadedImageUrl;
     } catch (error) {
@@ -107,28 +112,25 @@ const NewBusinessForm = () => {
       throw error;
     }
   };
-  
 
   const onSubmitForm = async (data: Business) => {
-    setIsLoading(true);
     try {
       // Perform API calls
 
-      uploadImageToS3(image || "")
-        .then((uploadedImageUrl) => {
-          data.businessID = uuidv4();
-          data.image = uploadedImageUrl;
-          console.log(data);
-        })
-        .catch((error) => {
-          console.error("Error uploading image:", error);
-        });
+      data.businessID = uuidv4();
+      data.image = image;
 
-      // mutate(data);
+      if (data.image) {
+        try {
+          const uploadedImageUrl = await uploadImageToS3(data.image);
+          data.image = uploadedImageUrl;
+          await mutate(data);
+        } catch (error) {
+          console.error("Error uploading image:", error);
+        }
+      } else await mutate(data);
     } catch (error) {
-      console.log(error);
-    } finally {
-      setIsLoading(false);
+      console.error("Error submitting form:", error);
     }
   };
 
@@ -230,13 +232,12 @@ const NewBusinessForm = () => {
         )}
 
         <Pressable
-          style={[styles.button, isLoading && styles.disabledButton]}
+          style={[styles.button, isSubmitting && styles.disabledButton]}
+          //@ts-ignore
           onPress={handleSubmit(onSubmitForm)}
-          disabled={isLoading}
+          disabled={isSubmitting} // Disable the button when isLoading is true
         >
-          <Text style={styles.buttonText}>
-            {isLoading ? "Submitting..." : "Submit"}
-          </Text>
+          <Text style={styles.buttonText}>Submit</Text>
         </Pressable>
       </ScrollView>
     </KeyboardAvoidingView>

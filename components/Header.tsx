@@ -1,43 +1,56 @@
 import React from "react";
-import { View, StyleSheet, TextInput } from "react-native";
+import { View, StyleSheet, TextInput, Pressable } from "react-native";
 import { useUser } from "@clerk/clerk-expo";
 import { Image } from "expo-image";
 import { Link } from "expo-router";
 import { blurhash } from "@/utils/constants";
 import { Feather } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 
 const Header = () => {
+  const router = useRouter();
   const { isLoaded, isSignedIn, user } = useUser();
   if (!isLoaded || !isSignedIn) return null;
+  const route = () =>
+    router.push({
+      pathname: `/(user)/${user.id}`,
+      params: {
+        name: `${user.firstName} ${user.lastName}`,
+        image: user.imageUrl,
+        email: user?.primaryEmailAddress?.emailAddress,
+      },
+    });
 
   return (
     <View style={styles.headerContainer}>
       <View style={styles.cartContainer}>
-      <View style={styles.cartIconContainer}>
+        <View style={styles.cartIconContainer}>
           <Link href={{ pathname: "/cart" }}>
             <Feather name="shopping-cart" size={20} color="black" />
           </Link>
         </View>
-
       </View>
       <View style={styles.searchContainer}>
-        <Feather name="search" size={18} color="#BDBDBD" style={styles.searchIcon} />
+        <Feather
+          name="search"
+          size={18}
+          color="#BDBDBD"
+          style={styles.searchIcon}
+        />
         <TextInput
           style={styles.searchInput}
           placeholder="Search"
           placeholderTextColor="#BDBDBD"
         />
       </View>
-      <View style={styles.profileContainer}>
-        <Link href={{ pathname: `/(user)/${user.id}` }}>
-          <Image
-            style={styles.profileImage}
-            source={{ uri: user.imageUrl }}
-            placeholder={blurhash}
-            transition={1000}
-          />
-        </Link>
-      </View>
+      <Pressable style={styles.profileContainer} onPress={route}>
+        <Image
+          style={styles.profileImage}
+          source={{ uri: user.imageUrl }}
+          placeholder={blurhash}
+          transition={1000}
+        />
+      </Pressable>
     </View>
   );
 };
@@ -53,7 +66,7 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     overflow: "hidden",
   },
-  
+
   cartContainer: {
     paddingHorizontal: 12,
   },
@@ -65,7 +78,6 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     height: 40,
     paddingHorizontal: 12,
-
   },
   searchIcon: {
     marginRight: 8,

@@ -19,12 +19,12 @@ const GlobalMapView = () => {
           `http://${process.env.EXPO_PUBLIC_URL}:8080/fetchLocations`
         );
         return res.data;
+       
       } catch (error) {
         console.log(error);
       }
     },
   });
-
 
   const focusMap = () => {
     const initialRegion = {
@@ -61,14 +61,14 @@ const GlobalMapView = () => {
         {markerComponents}
       </MapView>
       <Header />
-      <TouchableOpacity
+      {/* <TouchableOpacity
         onPress={focusMap}
         style={{ position: "absolute", top: 20, right: 20, zIndex: 999 }}
       >
         <View style={{ padding: 10, backgroundColor: "white", borderRadius: 5 }}>
           <Text>Focus</Text>
         </View>
-      </TouchableOpacity>
+      </TouchableOpacity> */}
       <BottomDraggableDrawer />
     </View>
   );

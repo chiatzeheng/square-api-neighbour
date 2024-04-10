@@ -54,16 +54,41 @@ func main() {
 	// Get the router from the routes package
 	router := routes.Router()
 
-	// Create a new CORS handler
+	// Middleware function to log requests
+	loggedRouter := logRequest(router)
 
+	url := os.Getenv("EXPO_PUBLIC_URL")
+	uri := url + `:8080`
+
+	// Create a new HTTP server with the loggedRouter as the handler
 	server := http.Server{
-		Addr:    ":8080",
-		Handler: router,
+		Addr:    uri,
+		Handler: loggedRouter,
 	}
-
-	fmt.Println("Server is running")
+	fmt.Println("Server is running", server.Addr)
 	if err := server.ListenAndServe(); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}
+}
 
+// Middleware function to log requests
+// Middleware function to log requests and errors
+func logRequest(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Log the request method and URL
+		log.Printf("Request: %s %s", r.Method, r.URL.Path)
+
+		// Call the next handler and catch any errors
+		defer func() {
+			if err := recover(); err != nil {
+				// Log the error message
+				log.Printf("Error: %v", err)
+				// Return a 500 Internal Server Error to the client
+				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			}
+		}()
+
+		// Call the next handler
+		next.ServeHTTP(w, r)
+	})
 }

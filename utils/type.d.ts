@@ -22,7 +22,7 @@ export interface Business {
 }
 
 export interface Location {
-  locationID: number;
+  locationID: string;
   latitude: number;
   longitude: number;
   latitudeDelta: number;

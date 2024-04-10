@@ -3,6 +3,7 @@ package routes
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -21,13 +22,18 @@ func SetDB(database *pgxpool.Pool) {
 func Router() *http.ServeMux {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) { w.Write([]byte("hello")) })
-	mux.HandleFunc("GET /getProducts", getProducts)
 	mux.HandleFunc("GET /fetchBusinesses", fetchBusinesses)
 	mux.HandleFunc("GET /fetchLocations", fetchBL)
+	mux.HandleFunc("GET /fetchProducts", getProducts)
+	mux.HandleFunc("POST /postBusiness", postBusiness)
+	mux.HandleFunc("DELETE /deleteBusiness", deleteBusiness)
+	mux.HandleFunc("POST /postLocation", postLocation)
+	mux.HandleFunc("GET /fetchProductsByID", fetchProductsByID)
+	mux.HandleFunc("GET /fetchBusinessByID", fetchBusinessByID)
+
 	return mux
 }
 
-// getProducts handles the GET request to fetch products
 func getProducts(w http.ResponseWriter, r *http.Request) {
 	// Check if the request method is GET
 	if r.Method != http.MethodGet {
@@ -36,7 +42,7 @@ func getProducts(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Execute the query with a context
-	rows, err := db.Query(context.Background(), `SELECT * FROM "defaultdb"."product"; `)
+	rows, err := db.Query(context.Background(), `SELECT * FROM "defaultdb"."Product"; `)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -127,6 +133,176 @@ func fetchBL(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(businessLocations)
+}
+
+func postBusiness(w http.ResponseWriter, r *http.Request) {
+	// Check if the request method is POST
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	fmt.Println()
+
+	// Decode the request body into a Business object
+	var business Business
+	err := json.NewDecoder(r.Body).Decode(&business)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// Insert the business data into the database
+	// Example: You need to implement this part according to your database schema
+	_, err = db.Exec(context.Background(), `INSERT INTO "defaultdb"."Business" (businessID, image, name, description, category) VALUES ($1, $2, $3, $4, $5)`, business.BusinessID, business.Image, business.Name, business.Description, business.Category)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Respond with the created business data
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(business)
+}
+
+func deleteBusiness(w http.ResponseWriter, r *http.Request) {
+	// Check if the request method is DELETE
+	if r.Method != http.MethodDelete {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	businessID := r.URL.Query().Get("id")
+	if businessID == "" {
+		http.Error(w, "BusinessID not provided", http.StatusBadRequest)
+		return
+	}
+
+	var count int
+	err := db.QueryRow(context.Background(), `SELECT COUNT(*) FROM "defaultdb"."Business" WHERE businessID = $1`, businessID).Scan(&count)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// If the count is 0, the business doesn't exist, so return an error
+	if count == 0 {
+		http.Error(w, "Business not found", http.StatusNotFound)
+		return
+	}
+
+	// Execute the delete query
+	_, newerr := db.Exec(context.Background(), `DELETE FROM "defaultdb"."Business" WHERE businessID = $1 `, businessID)
+	if newerr != nil {
+		http.Error(w, newerr.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Respond with success message
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{"message": "Business deleted successfully"})
+}
+
+func postLocation(w http.ResponseWriter, r *http.Request) {
+	// Check if the request method is POST
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Decode the request body into a Business object
+	var location Location
+	err := json.NewDecoder(r.Body).Decode(&location)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// Insert the business data into the database
+	// Example: You need to implement this part according to your database schema
+	_, err = db.Exec(context.Background(), `INSERT INTO "defaultdb"."Location" (LocationID, Latitude, Longitude, LatitudeDelta, LongitudeDelta) VALUES ($1, $2, $3, $4, $5)`, location.LocationID, location.Latitude, location.Longitude, location.LatitudeDelta, location.LongitudeDelta)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Respond with the created business data
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(location)
+}
+
+func fetchBusinessByID(w http.ResponseWriter, r *http.Request) {
+	// Check if the request method is GET
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	id := r.URL.Query().Get("id")
+	if id == "" {
+		http.Error(w, "Business ID Not Provided ", http.StatusBadRequest)
+		return
+	}
+
+	// Fetch businesses from the database
+	rows, err := db.Query(context.Background(), `SELECT * FROM "defaultdb"."Business" WHERE businessID = $1`, id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
+
+	var businesses []Business
+	for rows.Next() {
+		var b Business
+		err := rows.Scan(&b.BusinessID, &b.Name, &b.Image, &b.Description, &b.Category)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		businesses = append(businesses, b)
+	}
+
+	// Convert the businesses to JSON and send the response
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(businesses)
+}
+
+func fetchProductsByID(w http.ResponseWriter, r *http.Request) {
+	// Check if the request method is GET
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	id := r.URL.Query().Get("id")
+	if id == "" {
+		http.Error(w, "Business ID Not Provided ", http.StatusBadRequest)
+		return
+	}
+
+	// Execute the query with a context
+	rows, err := db.Query(context.Background(), `SELECT * FROM "defaultdb"."Product" p WHERE productID = $1`, id)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
+
+	var products []Product
+	for rows.Next() {
+		var p Product
+		err := rows.Scan(&p.ProductID, &p.Name, &p.Description, &p.Price, &p.Category, &p.BusinessID, &p.Image)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		products = append(products, p)
+	}
+
+	// Convert the products to JSON and send the response
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(products)
 }
 
 type Business struct {

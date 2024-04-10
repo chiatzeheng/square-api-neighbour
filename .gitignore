@@ -10,6 +10,7 @@ web-build/
 .env
 backend/server.crt
 backend/server.key
+./backend/.txt
 
 
 # Native

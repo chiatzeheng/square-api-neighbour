@@ -3,12 +3,11 @@ import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { useAuth, useUser } from "@clerk/clerk-expo";
 import { Image } from "expo-image";
 import { blurhash } from "@/utils/constants";
-import { Link, useNavigation } from "@react-navigation/native";
+import { Link, useLocalSearchParams } from "expo-router";
 
 const ProfileScreen = () => {
-  const { user } = useUser();
+  const params = useLocalSearchParams<{ name: string , image: string , email: string  }>();
   const { signOut } = useAuth();
-  const navigation = useNavigation();
 
   const handleLogout = () => {
     try {
@@ -23,18 +22,16 @@ const ProfileScreen = () => {
       <View style={styles.header}>
         <Image
           style={styles.profileImage}
-          source={{ uri: user?.imageUrl }}
+          source={{ uri: params.image }}
           placeholder={blurhash}
           transition={1000}
         />
-        <Text style={styles.name}>{`${user?.firstName} ${
-          user?.lastName || ""
-        }`}</Text>
+        <Text style={styles.name}>{`${params.name}` || ""}</Text>
         <Text style={styles.email}>
-          {user?.primaryEmailAddress?.emailAddress}
+          {params.email}
         </Text>
         <Text style={styles.divider}></Text>
-        <Link to="/(page)/[id]">
+        <Link href="/(page)/[id]" asChild>
          <Text style={styles.additionalInfo}>Apply for a Business?</Text>
         </Link>
       </View>
