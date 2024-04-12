@@ -1,9 +1,12 @@
 import React from "react";
 import { Marker, Callout } from "react-native-maps";
-import { View, Text, StyleSheet, Image } from "react-native";
+import { View, Text, StyleSheet, Image, Pressable } from "react-native";
 import { Location, Business } from "@/utils/type";
+import { Link } from "expo-router";
 
 export const Markers = ({ data }: { data: Location & Business }) => {
+
+
   const onMarkerSelected = (marker: Location & Business) => {
     // Alert.alert(`Location ID: ${marker.locationID}`);
   };
@@ -12,6 +15,9 @@ export const Markers = ({ data }: { data: Location & Business }) => {
     // console.log(marker);
   };
 
+
+  
+  
   return (
     <Marker
       key={data.locationID}
@@ -21,7 +27,11 @@ export const Markers = ({ data }: { data: Location & Business }) => {
       <Callout onPress={() => calloutPressed(data)}>
         <View style={styles.container}>
           {data.image && (
-            <Image source={{ uri: data.image }} style={styles.image} />
+            <Link href={{pathname: `/(page)/[id]`,
+            params: { id: data?.businessID }}} >
+              <Image source={{ uri: data.image }} style={styles.image} />
+            </Link>
+            
           )}
           <View style={styles.textContainer}>
             <Text style={styles.name}>{data.name}</Text>

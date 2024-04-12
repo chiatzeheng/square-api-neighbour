@@ -1,15 +1,22 @@
 import React from "react";
-import { View, StyleSheet, Dimensions, Text, Image } from "react-native";
+import { View, StyleSheet, Dimensions, Text, Image, Pressable } from "react-native";
 import { Link } from "expo-router";
+import { useRouter } from "expo-router"
 
 const { width } = Dimensions.get("window");
 const cardWidth = width * 0.8;
 
 const Cards = ({ item }: any) => {
 
+  const router = useRouter()
   return (
     <View style={styles.cardContainer}>
-      <Link href={`/(page)/${item.id}.tsx`}>
+      <Link
+        href={{
+          pathname: `/(page)/[id]`,
+          params: { id: item?.businessID }
+          
+        }}>
         {item.image && (
           <Image source={{ uri: item.image }} style={styles.cardImage} />
         )}
@@ -18,7 +25,7 @@ const Cards = ({ item }: any) => {
           <Text style={styles.cardCategory}>{item.category}</Text>
           <Text style={styles.cardDescription}>{item.description}</Text>
         </View>
-      </Link>
+        </Link>
     </View>
   );
 };

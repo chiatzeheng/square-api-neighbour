@@ -13,9 +13,9 @@ const Header = () => {
   if (!isLoaded || !isSignedIn) return null;
   const route = () =>
     router.push({
-      pathname: `/(user)/${user.id}`,
+      pathname: `/(user)/user`,
       params: {
-        name: `${user.firstName} ${user.lastName}`,
+        name: `${user.firstName}`,
         image: user.imageUrl,
         email: user?.primaryEmailAddress?.emailAddress,
       },

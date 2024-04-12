@@ -10,24 +10,12 @@ const App = () => {
   const sheetRef = useRef<BottomSheet>(null);
   const snapPoints = useMemo(() => ["20%", "60%"], []);
 
-  // const query1 = useQuery({
-  //   queryKey: ['products'],
-  //   queryFn: async () => {
-  //     try {
-  //       const res = await axios.get(`http://${process.env.EXPO_PUBLIC_URL}:8080/getProducts`);
-  //       return res.data;
-  //     } catch (error) {
-  //       console.log(error);
-  //     }
-  //   }
-  // })
-
   const query2 = useQuery({
     queryKey: ['businesses'],
     queryFn: async () => {
       try {
         const res = await axios.get(`http://${process.env.EXPO_PUBLIC_URL}:8080/fetchBusinesses`);
-        console.log(res.data)
+
         return res.data;
        
       } catch (error) {

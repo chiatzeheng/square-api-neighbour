@@ -50,8 +50,9 @@ export interface ARBusiness {
 }
 
 export interface Product {
-  id: number;
+  productID: number;
   name: string;
+  image: string;
   description: string;
   price: number;
   category: string;

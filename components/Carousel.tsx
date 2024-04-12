@@ -8,19 +8,10 @@ interface Props {
 }
 
 const Carousel = ({ data }: Props) => {
-
-  const uniqueKeyExtractor = (item: Product | Business, index: number) => {
-    if ('id' in item && item.id !== undefined) {
-      return item.id.toString();
-    }
-    return `${index}`;
-  };
-
   return (
     <FlatList
       data={data}
       renderItem={({ item }) => <Cards item={item} />}
-      keyExtractor={uniqueKeyExtractor}
       horizontal
       showsHorizontalScrollIndicator={false}
       pagingEnabled

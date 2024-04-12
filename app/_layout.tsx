@@ -80,19 +80,20 @@ function RootLayoutNav() {
           <GestureHandlerRootView>
             <View style={{ height: "100%", width: "100%" }}>
               <ThemeProvider
-                value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
+                value={DefaultTheme}
               >
                 <Stack
-                  screenOptions={{
-                    headerShown: false,
-                  }}
+                  // screenOptions={{
+                  //   headerShown: false,
+                  // }}
                   initialRouteName="index"
                 >
                   <Stack.Screen name="index" />
-                  <Stack.Screen name="(user)/[id]" />
+                  <Stack.Screen name="(user)/user" />
+                  <Stack.Screen name="(location)/main" />
+                  <Stack.Screen name="(location)/location" />
                   <Stack.Screen name="(page)/[id]" />
-                  <Stack.Screen name="main" />
-                  <Stack.Screen name="(page)/location" />
+                 
                 </Stack>
               </ThemeProvider>
             </View>
