@@ -11,24 +11,22 @@ const App = () => {
   const snapPoints = useMemo(() => ["20%", "60%"], []);
 
   const query2 = useQuery({
-    queryKey: ['businesses'],
+    queryKey: ["businesses"],
     queryFn: async () => {
       try {
-        const res = await axios.get(`http://${process.env.EXPO_PUBLIC_URL}:8080/fetchBusinesses`);
+        const res = await axios.get(
+          `http://${process.env.EXPO_PUBLIC_URL}:8080/fetchBusinesses`
+        );
 
         return res.data;
-       
       } catch (error) {
         console.log(error);
       }
-    }
-  })
-
+    },
+  });
 
   // callbacks
-  const handleSheetChange = useCallback((index: number) => {
-    
-  }, []);
+  const handleSheetChange = useCallback((index: number) => {}, []);
 
   return (
     <BottomSheet
@@ -38,14 +36,12 @@ const App = () => {
       onChange={handleSheetChange}
     >
       <BottomSheetScrollView contentContainerStyle={styles.contentContainer}>
-        <Text style={styles.headingText}>
-          Welcome to Neighbours🔥
-        </Text>
+        <Text style={styles.headingText}>Welcome to Neighbours🔥</Text>
         <Text style={styles.subheadingText}>
           Connect with your neighbors, discover local events, and share
           community updates.
         </Text>
-        <Carousel data={query2.data}/>
+        <Carousel data={query2.data} />
       </BottomSheetScrollView>
     </BottomSheet>
   );
@@ -67,15 +63,14 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginBottom: 10,
     textAlign: "center",
-    color: "black"
+    color: "black",
   },
   subheadingText: {
     fontSize: 16,
     marginBottom: 20,
     textAlign: "center",
-    color: "black"
+    color: "black",
   },
 });
 
 export default App;
-

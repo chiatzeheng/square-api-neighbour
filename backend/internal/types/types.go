@@ -3,11 +3,11 @@ package types
 import "time"
 
 type Business struct {
-	BusinessID  string `json:"businessID"`
-	Image       string `json:"image"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	Category    string `json:"category"`
+	BusinessID  string   `json:"businessID"`
+	Images      []string `json:"image,omitempty"`
+	Name        string   `json:"name"`
+	Description string   `json:"description"`
+	Category    string   `json:"category"`
 }
 
 type Location struct {
@@ -39,12 +39,35 @@ type ARBusiness struct {
 }
 
 type Product struct {
-	ProductID   string  `json:"productID"`
-	Image       string  `json:"image"`
-	Name        string  `json:"name"`
-	Description string  `json:"description"`
-	Price       float64 `json:"price"`
-	BusinessID  string  `json:"businessID"`
+	ProductID    string         `json:"productID"`
+	Images       []string       `json:"image,omitempty"`
+	Name         string         `json:"name"`
+	Description  string         `json:"description"`
+	Price        float64        `json:"price"`
+	Reviews      []Review       `json:"reviews,omitempty"`
+	Expect       []Expect       `json:"expect"`
+	BusinessID   string         `json:"businessID"`
+	Instructions []Instructions `json:"faq,omitempty"`
+}
+
+type Instructions struct {
+	InstructionID string   `json:"instructionID "`
+	Image         []string `json:"image,omitempty"`
+	Text          string   `json:"instruction"`
+}
+
+type Expect struct {
+	ExpectID    string `json:"expectID"`
+	Image       string `json:"productID"`
+	Description string `json:"expect"`
+}
+
+type Review struct {
+	ReviewID   string    `json:"reviewID"`
+	ProductID  string    `json:"productID"`
+	ReviewDate time.Time `json:"reviewDate"`
+	Rating     float32   `json:"rating"`
+	Review     string    `json:"review"`
 }
 
 type Transaction struct {

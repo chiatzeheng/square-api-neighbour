@@ -19,8 +19,7 @@ const Dashboard = () => {
           }
         },
       });
-    
-      console.log(locations.data)
+  
 
 return (
     <GlobalMapView locations={locations} />

@@ -15,7 +15,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import "react-native-get-random-values";
 import { Feather } from "@expo/vector-icons";
-import * as FileSystem from "expo-file-system";
 import * as ImagePicker from "expo-image-picker";
 import { v4 as uuidv4 } from "uuid";
 import axios from "axios";
@@ -40,7 +39,6 @@ function extractImageUrl(localUri: string) {
   }
 }
 
-
 const NewBusinessForm = () => {
   const {
     control,
@@ -53,12 +51,11 @@ const NewBusinessForm = () => {
   const router = useRouter();
   const [image, setImage] = useState<string>();
 
-
-  console.log(s3)
   const { mutate } = useMutation({
     mutationFn: (data: Business) =>
       axios.post(
-        `http://${process.env.EXPO_PUBLIC_URL}:8080/postBusiness`, data
+        `http://${process.env.EXPO_PUBLIC_URL}:8080/postBusiness`,
+        data
       ),
     onError: (error) => {
       console.log(error);
@@ -70,7 +67,7 @@ const NewBusinessForm = () => {
       });
     },
   });
-  
+
   const pickImage = async () => {
     // No permissions request is necessary for launching the image library
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -85,53 +82,19 @@ const NewBusinessForm = () => {
     }
   };
 
- // Import S3 from aws-sdk
-  
-  const uploadImageToS3 = async (localUri: string) => {
-    try {
-      // Read file content as binary data
-      const fileInfo = await FileSystem.getInfoAsync(localUri);
-      const fileContent = await FileSystem.readAsStringAsync(localUri, {
-        encoding: FileSystem.EncodingType.Base64,
-      });
-  
-      // Convert Base64-encoded string to binary data
-      const binaryData = Uint8Array.from(atob(fileContent), c => c.charCodeAt(0));
-  
-      // Upload file to S3
-      const params = {
-        Bucket: process.env.EXPO_PUBLIC_BUCKET,
-        Key: `${uuidv4()}.${fileInfo.uri.split('.').pop()}`,
-        Body: binaryData,
-        ContentType: 'image/jpeg', // Adjust content type as per your file type
-      };
-      const data = await s3.upload(params).promise();
-  
-      // Return uploaded image URL
-      return data.Location;
-    } catch (error) {
-      console.error("Error uploading image:", error);
-      throw error;
-    }
-  };
-  
+  // Import S3 from aws-sdk
 
   const onSubmitForm = async (data: Business) => {
     try {
-      // Perform API calls
-
+      // Generate business ID
       data.businessID = uuidv4();
-      data.image = image;
-
+      let file = { uri: data.image || "", name: uuidv4() };
       if (data.image) {
-        try {
-          const uploadedImageUrl = await uploadImageToS3(data.image);
-          data.image = uploadedImageUrl;
-          await mutate(data);
-        } catch (error) {
-          console.error("Error uploading image:", error);
-        }
-      } else await mutate(data);
+        await s3(file);
+        const s3url = `${process.env.EXPO_PUBLIC_LINK}${file.name}`;
+        data.image = s3url;
+      }
+      await mutate(data);
     } catch (error) {
       console.error("Error submitting form:", error);
     }

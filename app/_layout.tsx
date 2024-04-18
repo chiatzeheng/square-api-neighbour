@@ -83,9 +83,9 @@ function RootLayoutNav() {
                 value={DefaultTheme}
               >
                 <Stack
-                  // screenOptions={{
-                  //   headerShown: false,
-                  // }}
+                  screenOptions={{
+                    headerShown: false,
+                  }}
                   initialRouteName="index"
                 >
                   <Stack.Screen name="index" />
