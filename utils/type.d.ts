@@ -14,7 +14,7 @@ export interface User {
 
 export interface Business {
   businessID: string;
-  image: string | null | undefined;
+  images: string[];
   name: string;
   description: string;
   category: string;
@@ -27,7 +27,7 @@ export interface Location {
   longitude: number;
   latitudeDelta: number;
   longitudeDelta: number;
-} 
+}
 
 export interface AR {
   arID: number;

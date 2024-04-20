@@ -3,9 +3,9 @@ package business
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
+	"strings"
 
 	db "github.com/chiatzeheng/src/internal/routes/db"
 	"github.com/chiatzeheng/src/internal/types"
@@ -26,29 +26,26 @@ func FetchBusinesses(w http.ResponseWriter, r *http.Request) {
 	// Check if the request method is GET
 	if r.Method != http.MethodGet {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
 	}
 
 	// Fetch businesses from the database
-	rows, err := pool.Query(context.Background(), `SELECT "businessid", "name", "image", "description", "category" FROM "defaultdb"."Business";`)
+	rows, err := pool.Query(context.Background(), `SELECT "businessid", "name", "images", "description", "category" FROM "defaultdb"."Business";`)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
 	}
 	defer rows.Close()
 
 	var businesses []types.Business
 	for rows.Next() {
 		var b types.Business
-		err := rows.Scan(&b.BusinessID, &b.Name, &b.Image, &b.Description, &b.Category)
+		err := rows.Scan(&b.BusinessID, &b.Name, &b.Images, &b.Description, &b.Category)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
 		}
 		businesses = append(businesses, b)
 	}
 
-	// Convert the businesses to JSON and send the response
+	// Convert the businesses to JSON send the response
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(businesses)
 }
@@ -59,7 +56,22 @@ func FetchBL(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	rows, err := pool.Query(context.Background(), `SELECT * FROM "defaultdb"."Location" l JOIN "defaultdb"."Business" b ON b."businessid" = l."locationid";`)
+	rows, err := pool.Query(context.Background(), `
+		SELECT
+			b."businessid",
+			b."name",
+			b."images",
+			b."description",
+			b."category",
+			l."latitude",
+			l."longitude",
+			l."latitudedelta",
+			l."longitudedelta"
+		FROM
+			"defaultdb"."Location" l
+		JOIN
+			"defaultdb"."Business" b ON b."businessid" = l."locationid";
+	`)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -77,7 +89,7 @@ func FetchBL(w http.ResponseWriter, r *http.Request) {
 		var bl BusinessLocation
 		var l types.Location
 		var b types.Business
-		err := rows.Scan(&l.LocationID, &l.Latitude, &l.Longitude, &l.LatitudeDelta, &l.LongitudeDelta, &b.BusinessID, &b.Image, &b.Name, &b.Description, &b.Category)
+		err := rows.Scan(&b.BusinessID, &b.Name, &b.Images, &b.Description, &b.Category, &l.Latitude, &l.Longitude, &l.LatitudeDelta, &l.LongitudeDelta)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -98,8 +110,6 @@ func PostBusiness(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Println()
-
 	// Decode the request body into a Business object
 	var business types.Business
 	err := json.NewDecoder(r.Body).Decode(&business)
@@ -108,9 +118,14 @@ func PostBusiness(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Convert the slice of images to a PostgreSQL array string
+	imagesArray := "{" + strings.Join(business.Images, ",") + "}"
+
 	// Insert the business data into the database
-	// Example: You need to implement this part according to your database schema
-	_, err = pool.Exec(context.Background(), `INSERT INTO "defaultdb"."Business" (businessID, image, name, description, category) VALUES ($1, $2, $3, $4, $5)`, business.BusinessID, business.Image, business.Name, business.Description, business.Category)
+	_, err = pool.Exec(context.Background(), `
+        INSERT INTO "defaultdb"."Business" (businessID, images, name, description, category)
+        VALUES ($1, $2, $3, $4, $5)`,
+		business.BusinessID, imagesArray, business.Name, business.Description, business.Category)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -182,7 +197,7 @@ func FetchBusinessByID(w http.ResponseWriter, r *http.Request) {
 	var businesses []types.Business
 	for rows.Next() {
 		var b types.Business
-		err := rows.Scan(&b.BusinessID, &b.Image, &b.Name, &b.Description, &b.Category)
+		err := rows.Scan(&b.BusinessID, &b.Images, &b.Name, &b.Description, &b.Category)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return

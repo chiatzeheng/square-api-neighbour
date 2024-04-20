@@ -5,8 +5,6 @@ import { Location, Business } from "@/utils/type";
 import { Link } from "expo-router";
 
 export const Markers = ({ data }: { data: Location & Business }) => {
-
-
   const onMarkerSelected = (marker: Location & Business) => {
     // Alert.alert(`Location ID: ${marker.locationID}`);
   };
@@ -15,9 +13,6 @@ export const Markers = ({ data }: { data: Location & Business }) => {
     // console.log(marker);
   };
 
-
-  
-  
   return (
     <Marker
       key={data.locationID}
@@ -26,13 +21,16 @@ export const Markers = ({ data }: { data: Location & Business }) => {
     >
       <Callout onPress={() => calloutPressed(data)}>
         <View style={styles.container}>
-          {data.image && (
-            <Link href={{pathname: `/(page)/[id]`,
-            params: { id: data?.businessID }}} >
-              <Image source={{ uri: data.image }} style={styles.image} />
+          {data.images.map((image, index) => (
+            <Link
+              href={{
+                pathname: `/(page)/[id]`,
+                params: { id: data?.businessID },
+              }}
+            >
+              <Image key={index} source={{ uri: image }} style={styles.image} />
             </Link>
-            
-          )}
+          ))}
           <View style={styles.textContainer}>
             <Text style={styles.name}>{data.name}</Text>
             <Text style={styles.category}>{data.category}</Text>

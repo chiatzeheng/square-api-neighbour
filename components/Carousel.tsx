@@ -1,10 +1,10 @@
-import React from 'react';
-import { FlatList } from 'react-native';
-import { Product, Business } from '@/utils/type';
-import Cards from '@/components/Cards';
+import React from "react";
+import { FlatList } from "react-native";
+import { Product, Business } from "@/utils/type";
+import Cards from "@/components/Cards";
 
 interface Props {
-  data: (Product | Business)[];
+  data: Business[];
 }
 
 const Carousel = ({ data }: Props) => {

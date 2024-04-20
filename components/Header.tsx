@@ -17,7 +17,7 @@ const Header = () => {
       params: {
         name: `${user.firstName}`,
         image: user.imageUrl,
-        email: user?.primaryEmailAddress?.emailAddress,
+        email: user?.primaryEmailAddress?.emailAddress ?? "",
       },
     });
 

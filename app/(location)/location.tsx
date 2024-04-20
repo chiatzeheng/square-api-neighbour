@@ -38,7 +38,7 @@ export default function App() {
     onSuccess(data) {
       router.replace({
         pathname: `/(page)/[id]`,
-        params: { id: params?.id},
+        params: { id: params?.id },
       });
     },
   });
@@ -105,18 +105,16 @@ export default function App() {
           {
             text: "Yes",
             onPress: async () => {
-              setIsLoading(true);
               await mutate(region);
             },
           },
         ]
       );
-    } else {
-      Alert.alert(
-        "No Location Selected",
-        "Please select a location on the map."
-      );
     }
+  };
+
+  const goBack = () => {
+    router.back();
   };
 
   return (
@@ -132,27 +130,22 @@ export default function App() {
             <Text style={styles.promptText}>
               Tap on the map to select a location.
             </Text>
-            {!isLoading && selectedLocation && (
-              <View style={{ flex: 1, flexDirection: "row" }}>
-                {/* <TouchableOpacity
-                  style={[
-                    styles.button,
-                    !selectedLocation && styles.disabledButton,
-                  ]}
-                  
-                  disabled={!selectedLocation}
-                >
-                  <Text style={styles.buttonText}>Confirm Location</Text>
-                </TouchableOpacity>
 
+            <View style={{ flex: 1, flexDirection: "row" }}>
+              <Pressable style={styles.backButton} onPress={goBack}>
+                <Text style={styles.buttonText}>Go Back</Text>
+              </Pressable>
+              {!isLoading && selectedLocation && (
                 <Pressable
                   style={styles.reject}
                   onPress={() => setSelectedLocation(null)}
                 >
                   <Entypo name="cross" size={24} color="white" />
-                </Pressable> */}
-              </View>
-            )}
+                </Pressable>
+              )}
+            </View>
+
+            {/* Back Button */}
           </View>
         </>
       ) : null}
@@ -193,13 +186,21 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 24,
     borderRadius: 8,
+    marginRight: 10,
   },
   reject: {
     backgroundColor: "red",
     paddingVertical: 12,
     paddingHorizontal: 24,
-    marginHorizontal: 20,
+    marginHorizontal: 10,
     borderRadius: 8,
+  },
+  backButton: {
+    backgroundColor: "#ccc",
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    marginTop: 10,
   },
   disabledButton: {
     backgroundColor: "#ccc", // Grey color

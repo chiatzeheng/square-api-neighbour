@@ -21,7 +21,7 @@ const ViewScreen = () => {
       }
     },
   });
-
+    
   const business = useQuery({
     queryKey: ["businesses"],
     queryFn: async () => {

@@ -36,7 +36,7 @@ func FetchProductsByID(w http.ResponseWriter, r *http.Request) {
 	}
 
 	query := `SELECT p.productID, p.image, p.name, p.description, p.price, p.rating, 
-	r.reviews, e.expect, p.businessID, i.text, ,
+	r.reviews, e.expect, p.businessID, i.text, 
 	FROM products p
 	LEFT JOIN reviews r ON p.productID = r.productID
 	LEFT JOIN expect e ON p.productID = e.productID
@@ -64,7 +64,7 @@ func FetchProductsByID(w http.ResponseWriter, r *http.Request) {
 
 	// Convert the productes to JSON and send the response
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(products)
+	json.NewEncoder(w).Encode(rows)
 }
 
 // func GetProducts(w http.ResponseWriter, r *http.Request) {
@@ -117,7 +117,7 @@ func PostProducts(w http.ResponseWriter, r *http.Request) {
 
 	// Insert the product data into the database
 	// Example: You need to implement this part according to your database schema
-	_, err = pool.Exec(context.Background(), `INSERT INTO "defaultdb"."Products" (productID, images, name, description, category) VALUES ($1, $2, $3, $4, $5)`, product.productID, product.Images, product.Name, product.Description, product.Category)
+	_, err = pool.Exec(context.Background(), `INSERT INTO "defaultdb"."Products" (productID, images, name, description, category) VALUES ($1, $2, $3, $4, $5)`, product.ProductID, product.Images, product.Name, product.Description)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

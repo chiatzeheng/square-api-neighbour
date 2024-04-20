@@ -79,9 +79,7 @@ function RootLayoutNav() {
         <SignedIn>
           <GestureHandlerRootView>
             <View style={{ height: "100%", width: "100%" }}>
-              <ThemeProvider
-                value={DefaultTheme}
-              >
+              <ThemeProvider value={DefaultTheme}>
                 <Stack
                   screenOptions={{
                     headerShown: false,
@@ -93,7 +91,7 @@ function RootLayoutNav() {
                   <Stack.Screen name="(location)/main" />
                   <Stack.Screen name="(location)/location" />
                   <Stack.Screen name="(page)/[id]" />
-                 
+                  <Stack.Screen name="(product)/addproducts" />
                 </Stack>
               </ThemeProvider>
             </View>

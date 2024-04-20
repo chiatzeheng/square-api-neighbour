@@ -1,31 +1,35 @@
 import React from "react";
-import { View, StyleSheet, Dimensions, Text, Image, Pressable } from "react-native";
+import {
+  View,
+  StyleSheet,
+  Dimensions,
+  Text,
+  Image,
+  Pressable,
+} from "react-native";
 import { Link } from "expo-router";
-import { useRouter } from "expo-router"
+import { useRouter } from "expo-router";
 
 const { width } = Dimensions.get("window");
 const cardWidth = width * 0.8;
 
 const Cards = ({ item }: any) => {
-
-  const router = useRouter()
+  const router = useRouter();
   return (
     <View style={styles.cardContainer}>
       <Link
         href={{
           pathname: `/(page)/[id]`,
-          params: { id: item?.businessID }
-          
-        }}>
-        {item.image && (
-          <Image source={{ uri: item.image }} style={styles.cardImage} />
-        )}
+          params: { id: item?.businessID },
+        }}
+      >
+        <Image source={{ uri: item.images[0] }} style={styles.cardImage} />
         <View style={styles.textContainer}>
           <Text style={styles.cardTitle}>{item.name}</Text>
           <Text style={styles.cardCategory}>{item.category}</Text>
           <Text style={styles.cardDescription}>{item.description}</Text>
         </View>
-        </Link>
+      </Link>
     </View>
   );
 };

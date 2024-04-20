@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   TextInput,
@@ -22,22 +22,8 @@ import { useMutation } from "@tanstack/react-query";
 import { Business } from "@/utils/type";
 import { s3 } from "@/utils/bucket";
 import { useRouter } from "expo-router";
-
-const schema = z.object({
-  name: z.string().min(1).max(255),
-  description: z.string().min(1),
-  category: z.string().min(1),
-});
-
-function extractImageUrl(localUri: string) {
-  const pattern = /file:\/\/\/var\/.*?\.jpg/g;
-  const matches = localUri.match(pattern);
-  if (matches && matches.length > 0) {
-    return matches[0];
-  } else {
-    return null;
-  }
-}
+import { businessSchema } from "@/utils/constants";
+import { atob } from "react-native-quick-base64";
 
 const NewBusinessForm = () => {
   const {
@@ -45,11 +31,11 @@ const NewBusinessForm = () => {
     handleSubmit,
     formState: { errors, isSubmitting, isSubmitSuccessful },
   } = useForm({
-    resolver: zodResolver(schema),
+    resolver: zodResolver(businessSchema),
   });
 
   const router = useRouter();
-  const [image, setImage] = useState<string>();
+  const [images, setImages] = useState<any>([]);
 
   const { mutate } = useMutation({
     mutationFn: (data: Business) =>
@@ -61,6 +47,7 @@ const NewBusinessForm = () => {
       console.log(error);
     },
     onSuccess(res) {
+      console.log("Sucess ", res);
       router.push({
         pathname: "/(location)/location",
         params: { id: res.data.businessID },
@@ -69,35 +56,48 @@ const NewBusinessForm = () => {
   });
 
   const pickImage = async () => {
-    // No permissions request is necessary for launching the image library
     let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
+      selectionLimit: 6,
       aspect: [4, 3],
       quality: 1,
     });
 
     if (!result.canceled) {
-      setImage(result.assets?.[0].uri);
+      setImages([...images, result.assets[0].uri]);
     }
   };
 
-  // Import S3 from aws-sdk
+  const removeImage = (index: number) => {
+    //@ts-ignore
+    setImages(images.filter((_, i) => i !== index));
+  };
 
   const onSubmitForm = async (data: Business) => {
     try {
-      // Generate business ID
+      let uri = [];
       data.businessID = uuidv4();
-      let file = { uri: data.image || "", name: uuidv4() };
-      if (data.image) {
-        await s3(file);
-        const s3url = `${process.env.EXPO_PUBLIC_LINK}${file.name}`;
-        data.image = s3url;
+
+      if (images) {
+        for (let image of images) {
+          const img = await fetchImageFromUri(image);
+          let file = { uri: img, name: uuidv4() };
+          await s3(file);
+          uri.push(`${process.env.EXPO_PUBLIC_LINK}${file.name}` || "");
+        }
       }
+      data.images = uri;
       await mutate(data);
     } catch (error) {
       console.error("Error submitting form:", error);
     }
+  };
+
+  const fetchImageFromUri = async (uri: string) => {
+    const response = await fetch(uri);
+    const blob = await response.blob();
+    return blob;
   };
 
   return (
@@ -108,34 +108,26 @@ const NewBusinessForm = () => {
       <ScrollView contentContainerStyle={styles.container}>
         <Text style={styles.headerText}> Ready for Something New? 👀</Text>
         <Text style={styles.subHeaderText}>Show us something!</Text>
+
         <ScrollView horizontal contentContainerStyle={styles.imageScrollView}>
-          {/* USE THIS FOR MULTIPLE IMAGES
-          {images.map((image, index) => (
-            <View key={index} style={styles.imageContainer}>
-              <Image source={{ uri: image }} style={styles.image} />
-              <Pressable
-                style={styles.deleteButton}
-                onPress={() => removeImage(index)}
-              >
-                <Feather name="trash-2" size={24} color="white" />
-              </Pressable>
-            </View>
-          ))} */}
-          {image ? (
-            <View style={styles.imageContainer}>
-              <Image source={{ uri: image }} style={styles.image} />
-              <Pressable
-                style={styles.deleteButton}
-                onPress={() => setImage("")}
-              >
-                <Feather name="trash-2" size={24} color="white" />
-              </Pressable>
-            </View>
-          ) : (
-            <Pressable style={styles.addImageButton} onPress={pickImage}>
-              <Text style={styles.addImageText}>Add Image</Text>
-            </Pressable>
-          )}
+          {images
+            ? images.map((image: string, index: number) => (
+                <>
+                  <View key={index} style={styles.imageContainer}>
+                    <Image source={{ uri: image }} style={styles.image} />
+                    <Pressable
+                      style={styles.deleteButton}
+                      onPress={() => removeImage(index)}
+                    >
+                      <Feather name="trash-2" size={24} color="white" />
+                    </Pressable>
+                  </View>
+                </>
+              ))
+            : null}
+          <Pressable style={styles.addImageButton} onPress={pickImage}>
+            <Text style={styles.addImageText}>Add Image</Text>
+          </Pressable>
         </ScrollView>
 
         <Text style={styles.labelText}>Name</Text>

@@ -3,7 +3,7 @@ import "react-native-get-random-values";
 import "react-native-url-polyfill/auto";
 
 interface File {
-  uri: string;
+  uri: Blob;
   name: string;
 }
 
@@ -28,19 +28,14 @@ const client = new S3Client({
 });
 
 export const s3 = async (file: File) => {
+  const command = new PutObjectCommand({
+    Bucket: options.bucket,
+    Key: "Singapore/" + file.name,
+    Body: file.uri,
+  });
   try {
-    await client
-      .send(
-        new PutObjectCommand({
-          Bucket: options.bucket,
-          Key: "Singapore/" + file.name,
-          Body: file.uri,
-        })
-      )
-      .catch((error) => {
-        console.log(error);
-      });
-  } catch (error) {
-    console.log(error);
+    return await client.send(command);
+  } catch (err) {
+    console.error(err);
   }
 };

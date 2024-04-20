@@ -1,10 +1,12 @@
 package types
 
-import "time"
+import (
+	"time"
+)
 
 type Business struct {
 	BusinessID  string   `json:"businessID"`
-	Images      []string `json:"image,omitempty"`
+	Images      []string `json:"images"`
 	Name        string   `json:"name"`
 	Description string   `json:"description"`
 	Category    string   `json:"category"`
@@ -57,7 +59,7 @@ type Instructions struct {
 }
 
 type Expect struct {
-	ExpectID    string `json:"expectID"`
+	ExpectID    string `json:"expec	tID"`
 	Image       string `json:"productID"`
 	Description string `json:"expect"`
 }

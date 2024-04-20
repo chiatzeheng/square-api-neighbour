@@ -14,7 +14,7 @@ func Router() *http.ServeMux {
 	mux.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) { w.Write([]byte("hello")) })
 	mux.HandleFunc("GET /fetchBusinesses", business.FetchBusinesses)
 	mux.HandleFunc("GET /fetchLocations", business.FetchBL)
-	mux.HandleFunc("GET /fetchProducts", products.GetProducts)
+	//mux.HandleFunc("GET /fetchProducts", products.GetProducts)
 	mux.HandleFunc("POST /postBusiness", business.PostBusiness)
 	mux.HandleFunc("DELETE /deleteBusiness", business.DeleteBusiness)
 	mux.HandleFunc("POST /postLocation", location.PostLocation)

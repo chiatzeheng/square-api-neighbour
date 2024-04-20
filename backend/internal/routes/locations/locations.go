@@ -36,7 +36,7 @@ func PostLocation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = pool.Exec(context.Background(), `INSERT INTO "defaultdb"."Location" (LocationID, Latitude, Longitude, LatitudeDelta, LongitudeDelta) VALUES ($1, $2, $3, $4, $5)`, location.LocationID, location.Latitude, location.Longitude, location.LatitudeDelta, location.LongitudeDelta)
+	_, err = pool.Exec(context.Background(), `INSERT INTO "defaultdb"."Location" (locationid, latitude, longitude, latitudedelta, longitudedelta) VALUES ($1, $2, $3, $4, $5)`, location.LocationID, location.Latitude, location.Longitude, location.LatitudeDelta, location.LongitudeDelta)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
