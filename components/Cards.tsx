@@ -1,12 +1,6 @@
 import React from "react";
-import {
-  View,
-  StyleSheet,
-  Dimensions,
-  Text,
-  Image,
-  Pressable,
-} from "react-native";
+import { View, StyleSheet, Dimensions, Text, Pressable } from "react-native";
+import { Image } from "expo-image";
 import { Link } from "expo-router";
 import { useRouter } from "expo-router";
 
@@ -23,7 +17,10 @@ const Cards = ({ item }: any) => {
           params: { id: item?.businessID },
         }}
       >
-        <Image source={{ uri: item.images[0] }} style={styles.cardImage} />
+        <Image
+          source={{ uri: item.images.toString() }}
+          style={styles.cardImage}
+        />
         <View style={styles.textContainer}>
           <Text style={styles.cardTitle}>{item.name}</Text>
           <Text style={styles.cardCategory}>{item.category}</Text>

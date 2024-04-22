@@ -23,6 +23,7 @@ export const Markers = ({ data }: { data: Location & Business }) => {
         <View style={styles.container}>
           {data.images.map((image, index) => (
             <Link
+              key={index}
               href={{
                 pathname: `/(page)/[id]`,
                 params: { id: data?.businessID },

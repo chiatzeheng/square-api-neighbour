@@ -52,7 +52,7 @@ export interface ARBusiness {
 export interface Product {
   productID: number;
   name: string;
-  image: string;
+  images: string[];
   description: string;
   price: number;
   category: string;

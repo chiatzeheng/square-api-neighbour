@@ -42,7 +42,7 @@ type ARBusiness struct {
 
 type Product struct {
 	ProductID    string         `json:"productID"`
-	Images       []string       `json:"image,omitempty"`
+	Images       []string       `json:"images,omitempty"`
 	Name         string         `json:"name"`
 	Description  string         `json:"description"`
 	Price        float64        `json:"price"`
@@ -54,13 +54,15 @@ type Product struct {
 
 type Instructions struct {
 	InstructionID string   `json:"instructionID "`
-	Image         []string `json:"image,omitempty"`
+	ProductID     string   `json:"productID"`
+	Image         []string `json:"image"`
 	Text          string   `json:"instruction"`
 }
 
 type Expect struct {
-	ExpectID    string `json:"expec	tID"`
-	Image       string `json:"productID"`
+	ExpectID    string `json:"expectID"`
+	ProductID   string `json:"productID"`
+	Image       string `json:"image"`
 	Description string `json:"expect"`
 }
 

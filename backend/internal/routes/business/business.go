@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
-	"strings"
 
 	db "github.com/chiatzeheng/src/internal/routes/db"
 	"github.com/chiatzeheng/src/internal/types"
@@ -117,15 +116,11 @@ func PostBusiness(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-
-	// Convert the slice of images to a PostgreSQL array string
-	imagesArray := "{" + strings.Join(business.Images, ",") + "}"
-
 	// Insert the business data into the database
 	_, err = pool.Exec(context.Background(), `
         INSERT INTO "defaultdb"."Business" (businessID, images, name, description, category)
         VALUES ($1, $2, $3, $4, $5)`,
-		business.BusinessID, imagesArray, business.Name, business.Description, business.Category)
+		business.BusinessID, business.Images, business.Name, business.Description, business.Category)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -187,7 +182,7 @@ func FetchBusinessByID(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Fetch businesses from the database
-	rows, err := pool.Query(context.Background(), `SELECT * FROM "defaultdb"."Business" WHERE businessID = $1`, id)
+	rows, err := pool.Query(context.Background(), `SELECT "businessid", "name", "images", "description", "category"  FROM "defaultdb"."Business" WHERE businessID = $1`, id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -197,7 +192,7 @@ func FetchBusinessByID(w http.ResponseWriter, r *http.Request) {
 	var businesses []types.Business
 	for rows.Next() {
 		var b types.Business
-		err := rows.Scan(&b.BusinessID, &b.Images, &b.Name, &b.Description, &b.Category)
+		err := rows.Scan(&b.BusinessID, &b.Name, &b.Images, &b.Description, &b.Category)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return

@@ -6,7 +6,11 @@ import { blurhash } from "@/utils/constants";
 import { Link, useLocalSearchParams } from "expo-router";
 
 const ProfileScreen = () => {
-  const params = useLocalSearchParams<{ name: string , image: string , email: string  }>();
+  const params = useLocalSearchParams<{
+    name: string;
+    image: string;
+    email: string;
+  }>();
   const { signOut } = useAuth();
 
   const handleLogout = () => {
@@ -27,15 +31,11 @@ const ProfileScreen = () => {
           transition={1000}
         />
         <Text style={styles.name}>{`${params.name}` || ""}</Text>
-        <Text style={styles.email}>
-          {params.email}
-        </Text>
+        <Text style={styles.email}>{params.email}</Text>
         <Text style={styles.divider}></Text>
-        <Link href={`/(location)/main`} >
-         <Text style={styles.additionalInfo}>Apply for a Business?</Text>
+        <Link href={`/(create)/main`}>
+          <Text style={styles.additionalInfo}>Apply for a Business?</Text>
         </Link>
-
-    
       </View>
 
       <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
@@ -67,7 +67,6 @@ const styles = StyleSheet.create({
   header: {
     alignItems: "center",
     marginBottom: 30,
-
   },
   profileImage: {
     width: 100,

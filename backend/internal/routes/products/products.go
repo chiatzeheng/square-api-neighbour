@@ -51,54 +51,65 @@ func FetchProductsByID(w http.ResponseWriter, r *http.Request) {
 	}
 	defer rows.Close()
 
-	// var products []types.Product
-	// for rows.Next() {
-	// 	var p types.Product
-	// 	err := rows.Scan(&p.ProductID, &p.Images, &p.Name, &p.Description, &p.Price)
-	// 	if err != nil {
-	// 		http.Error(w, err.Error(), http.StatusInternalServerError)
-	// 		return
-	// 	}
-	// 	products = append(products, p)
-	// }
+	type AllProducts struct {
+		types.Product
+		types.Review
+		types.Expect
+		types.Instructions
+	}
+
+	var products []types.Product
+	for rows.Next() {
+		var p types.Product
+		// var r types.Review
+		var e types.Expect
+		var i types.Instructions
+
+		err := rows.Scan(&p.ProductID, &p.Images, &p.Name, &p.Description, &p.Price, &i.Image,
+			&i.Text, &e.Image, &e.Description, &p.BusinessID)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		products = append(products, p)
+	}
 
 	// Convert the productes to JSON and send the response
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(rows)
+	json.NewEncoder(w).Encode(products)
 }
 
-// func GetProducts(w http.ResponseWriter, r *http.Request) {
+func FetchProductByID(w http.ResponseWriter, r *http.Request) {
+	// Check if the request method is GET
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
 
-// 	if r.Method != http.MethodGet {
-// 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-// 		return
-// 	}
+	id := r.URL.Query().Get("id")
+	if id == "" {
+		http.Error(w, "Business ID Not Provided ", http.StatusBadRequest)
+		return
+	}
 
-// 	rows, err := pool.Query(r.Context(), `SELECT productid, images, name, description, price,  FROM "defaultdb"."Product";`)
-// 	if err != nil {
-// 		http.Error(w, err.Error(), http.StatusInternalServerError)
-// 		return
-// 	}
-// 	defer rows.Close()
+	// Fetch businesses from the database
+	rows, err := pool.Query(context.Background(), `SELECT "productid", "name", "images", "description", "price"  FROM "defaultdb"."Product" WHERE businessID = $1`, id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
 
-// 	var products []types.Product
+	var products []types.Product
+	for rows.Next() {
+		var p types.Product
+		rows.Scan(&p.ProductID, &p.Name, &p.Images, &p.Description, &p.Price)
+		products = append(products, p)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(products)
 
-// 	for rows.Next() {
-// 		var p types.Product
-// 		//var priceValue interface{} // Use interface{} to handle any type
-
-// 		err := rows.Scan(&p.ProductID, &p.Images, &p.Name, &p.Description, &p.Price, &p.productID)
-// 		if err != nil {
-// 			http.Error(w, err.Error(), http.StatusInternalServerError)
-// 			return
-// 		}
-
-// 		products = append(products, p)
-// 	}
-
-// 	w.Header().Set("Content-Type", "application/json")
-// 	json.NewEncoder(w).Encode(products)
-// }
+}
 
 func PostProducts(w http.ResponseWriter, r *http.Request) {
 	// Check if the request method is POST

@@ -8,9 +8,8 @@ import BottomDraggableDrawer from "@/components/BottomDraggableDrawer";
 import { Markers } from "@/components/Markers";
 import * as location from "expo-location";
 
-const GlobalMapView = ({locations}: any) => {
-
-  const { data, isLoading, error} = locations
+const GlobalMapView = ({ locations }: any) => {
+  const { data, isLoading, error } = locations;
   const mapRef = React.useRef<MapView>(null);
 
   const focusMap = () => {
@@ -31,8 +30,8 @@ const GlobalMapView = ({locations}: any) => {
     () =>
       isLoading || error
         ? null
-        : data?.map((item: any) => (
-            <Markers key={`${item.locationID}-${item.latitude}-${item.longitude}`} data={item} />
+        : data?.map((item: any, index: number) => (
+            <Markers key={index} data={item} />
           )),
     [isLoading, error, data]
   );
