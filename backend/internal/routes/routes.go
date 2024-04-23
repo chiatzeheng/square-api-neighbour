@@ -13,12 +13,13 @@ func Router() *http.ServeMux {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /fetchBusinesses", business.FetchBusinesses)
 	mux.HandleFunc("GET /fetchLocations", business.FetchBL)
-	mux.HandleFunc("GET /fetchProducts", products.FetchProductByID)
+	mux.HandleFunc("GET /fetchProductsAll", products.FetchProductByID)
 	mux.HandleFunc("POST /postBusiness", business.PostBusiness)
 	mux.HandleFunc("DELETE /deleteBusiness", business.DeleteBusiness)
 	mux.HandleFunc("POST /postLocation", location.PostLocation)
 	mux.HandleFunc("GET /fetchProductsByID", products.FetchProductsByID)
 	mux.HandleFunc("GET /fetchBusinessByID", business.FetchBusinessByID)
+	mux.HandleFunc("GET /fetchProducts", products.FetchProducts)
 
 	return mux
 }

@@ -5,25 +5,10 @@ import Carousel from "@/components/Carousel";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 
-const App = () => {
+const App = (businesses: any) => {
   // hooks
   const sheetRef = useRef<BottomSheet>(null);
   const snapPoints = useMemo(() => ["20%", "60%"], []);
-
-  const query2 = useQuery({
-    queryKey: ["businesses"],
-    queryFn: async () => {
-      try {
-        const res = await axios.get(
-          `http://${process.env.EXPO_PUBLIC_URL}:8080/fetchBusinesses`
-        );
-
-        return res.data;
-      } catch (error) {
-        console.log(error);
-      }
-    },
-  });
 
   // callbacks
   const handleSheetChange = useCallback((index: number) => {}, []);
@@ -41,7 +26,7 @@ const App = () => {
           Connect with your neighbors, discover local events, and share
           community updates.
         </Text>
-        <Carousel data={query2.data} />
+        <Carousel business={businesses.data} />
       </BottomSheetScrollView>
     </BottomSheet>
   );

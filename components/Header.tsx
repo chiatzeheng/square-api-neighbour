@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   StyleSheet,
@@ -6,6 +6,8 @@ import {
   Pressable,
   Text,
   Animated,
+  Dimensions,
+  ScrollView,
 } from "react-native";
 import { useUser } from "@clerk/clerk-expo";
 import { Image } from "expo-image";
@@ -13,83 +15,71 @@ import { Link } from "expo-router";
 import { blurhash } from "@/utils/constants";
 import { Feather } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import Fuse from "fuse.js"; // Import Fuse
+import Fuse from "fuse.js";
+import { Business, Product } from "@/utils/type";
 
-import Search from "./SearchBar";
-
-const Header = () => {
+const Header = ({
+  businesses,
+  products,
+}: {
+  businesses: Business;
+  products: Product;
+}) => {
   const router = useRouter();
   const { isLoaded, isSignedIn, user } = useUser();
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState([]);
-  const [showExtensions, setShowExtension] = useState(false); // State for extension visibility
-  const [extensionItems, setExtensionItems] = useState([]); // State for extension items
+  const [extensionItems, setExtensionItems] = useState([]);
+  const [showExtension, setShowExtension] = useState(false);
 
-  const animatedHeight = useRef(new Animated.Value(0)).current;
-  const animatedOpacity = useRef(new Animated.Value(0)).current;
+  const extensionScaleY = useRef(new Animated.Value(0)).current;
 
-  // Your array of objects to search through
-  const data = [
-    { id: 1, name: "John Doe" },
-    { id: 2, name: "Jane Smith" },
-    { id: 3, name: "Alice Johnson" },
-    // Add more objects as needed
-  ];
+  useEffect(() => {
+    if (searchResults.length > 0) {
+      showExtensionWithAnimation(searchResults);
+    } else {
+      hideExtension();
+    }
+  }, [searchResults]);
 
-  // Fuse options
   const fuseOptions = {
-    keys: ["name"], // Specify the keys to search in
-    threshold: 0.3, // Adjust this as needed
+    keys: ["name", "description", "category"],
+    threshold: 0.3,
   };
 
-  // Initialize Fuse
-  const fuse = new Fuse(data, fuseOptions);
+  const searchData = [...businesses, ...products];
+  const fuse = new Fuse(searchData, fuseOptions);
 
-  // Search function
-  const handleSearch = (text) => {
+  const handleSearch = (text: string) => {
     setSearchTerm(text);
     if (!text) {
       setSearchResults([]);
-      hideExtension(); // Hide extension if search term is empty
+      hideExtension();
       return;
     }
     const results = fuse.search(text);
     const items = results.map((result) => result.item);
     setSearchResults(items);
-    showExtension(items); // Show extension with search results
-    setExtensionItems(items);
   };
 
-  const showExtension = (items) => {
+  const showExtensionWithAnimation = (items) => {
     setShowExtension(true);
-    Animated.parallel([
-      Animated.timing(animatedHeight, {
-        toValue: items.length * 30, // Adjust height based on content
-        duration: 300,
-        useNativeDriver: false,
-      }),
-      Animated.timing(animatedOpacity, {
-        toValue: 1,
-        duration: 300,
-        useNativeDriver: true,
-      }),
-    ]).start();
+    setExtensionItems(items);
+    Animated.timing(extensionScaleY, {
+      toValue: 1,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
   };
 
   const hideExtension = () => {
-    Animated.parallel([
-      Animated.timing(animatedHeight, {
-        toValue: 0,
-        duration: 300,
-        useNativeDriver: false,
-      }),
-      Animated.timing(animatedOpacity, {
-        toValue: 0,
-        duration: 300,
-        useNativeDriver: true,
-      }),
-    ]).start(() => {
+    Animated.timing(extensionScaleY, {
+      toValue: 0,
+      duration: 300,
+      useNativeDriver: true,
+    }).start(() => {
       setShowExtension(false);
+      setExtensionItems([]);
     });
   };
 
@@ -111,26 +101,18 @@ const Header = () => {
         <View style={styles.cartContainer}>
           <View style={styles.cartIconContainer}>
             <Link href={{ pathname: "/cart" }}>
-              <Feather name="shopping-cart" size={20} color="black" />
+              <Feather name="shopping-cart" size={20} color="grey" />
             </Link>
           </View>
         </View>
 
-        <View style={styles.searchContainer}>
-          <Feather
-            name="search"
-            size={18}
-            color="#BDBDBD"
-            style={styles.searchIcon}
-          />
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Search"
-            placeholderTextColor="#BDBDBD"
-            onChangeText={handleSearch} // Call handleSearch on text change
-            value={searchTerm}
-          />
-        </View>
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Search"
+          placeholderTextColor="#BDBDBD"
+          onChangeText={handleSearch}
+          value={searchTerm}
+        />
 
         <Pressable style={styles.profileContainer} onPress={route}>
           <Image
@@ -141,22 +123,17 @@ const Header = () => {
           />
         </Pressable>
       </View>
-
-      {showExtension && ( // Render extension if showExtension is true
-        <Animated.View
-          style={[
-            styles.extensionContainer,
-            {
-              height: animatedHeight,
-              opacity: animatedOpacity,
-            },
-          ]}
-        >
-          {extensionItems.map((item) => (
-            <Text key={item.id}>{item.name}</Text>
-          ))}
-        </Animated.View>
-      )}
+      <Animated.ScrollView style={{ maxHeight: 200 }}>
+        {extensionItems.map((item, index) => (
+          <View key={index} style={styles.resultItem}>
+            <Image
+              source={{ uri: item?.images[0] }}
+              style={styles.resultImage}
+            />
+            <Text style={styles.resultText}>{item?.name}</Text>
+          </View>
+        ))}
+      </Animated.ScrollView>
     </View>
   );
 };
@@ -167,12 +144,12 @@ const styles = StyleSheet.create({
     marginTop: 50,
     marginHorizontal: 16,
     borderRadius: 25,
-    overflow: "hidden", // Add padding to accommodate the extension
+    overflow: "hidden",
   },
   headerContent: {
     flexDirection: "row",
     alignItems: "center",
-    height: 60, // Default height of the header
+    height: 60,
   },
   cartContainer: {
     paddingHorizontal: 12,
@@ -214,9 +191,31 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
     borderRadius: 10,
     marginTop: 10,
-    padding: 10,
-    overflow: "hidden", // Hide overflow content when collapsed
-    elevation: 3, // Add elevation for shadow
+    paddingVertical: 10,
+    elevation: 3,
+    position: "absolute",
+    top: 90,
+    left: 16,
+    right: 16,
+    zIndex: 100,
+  },
+  resultItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: "#E0E0E0",
+  },
+  resultImage: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    marginRight: 12,
+  },
+  resultText: {
+    fontSize: 16,
+    color: "#333333",
   },
 });
 

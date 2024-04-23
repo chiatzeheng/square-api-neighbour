@@ -6,4 +6,3 @@ const config = getDefaultConfig(__dirname);
 config.resolver.assetExts.push("glb");
 module.exports = config;
 
-module.exports = config;

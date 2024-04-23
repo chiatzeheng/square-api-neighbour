@@ -7,10 +7,10 @@ interface Props {
   data: Business[];
 }
 
-const Carousel = ({ data }: Props) => {
+const Carousel = ({ business }: Props) => {
   return (
     <FlatList
-      data={data}
+      data={business.data}
       renderItem={({ item }) => <Cards item={item} />}
       horizontal
       showsHorizontalScrollIndicator={false}

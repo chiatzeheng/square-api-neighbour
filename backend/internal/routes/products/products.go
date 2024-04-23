@@ -20,6 +20,30 @@ func init() {
 		log.Fatal(err)
 	}
 }
+func FetchProducts(w http.ResponseWriter, r *http.Request) {
+	// Check if the request method is GET
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Fetch businesses from the database
+	rows, err := pool.Query(context.Background(), `SELECT "productid", "name", "images", "description", "price"  FROM "defaultdb"."Product"`)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
+
+	var products []types.Product
+	for rows.Next() {
+		var p types.Product
+		rows.Scan(&p.ProductID, &p.Name, &p.Images, &p.Description, &p.Price)
+		products = append(products, p)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(products)
+}
 
 func FetchProductsByID(w http.ResponseWriter, r *http.Request) {
 	// Check if the request method is GET

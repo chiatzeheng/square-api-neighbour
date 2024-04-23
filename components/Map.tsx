@@ -36,6 +36,35 @@ const GlobalMapView = ({ locations }: any) => {
     [isLoading, error, data]
   );
 
+  const products = useQuery({
+    queryKey: ["products"],
+    queryFn: async () => {
+      try {
+        const res = await axios.get(
+          `http://${process.env.EXPO_PUBLIC_URL}:8080/fetchProducts`
+        );
+        return res.data;
+      } catch (error) {
+        console.log(error);
+      }
+    },
+  });
+
+  const businesses = useQuery({
+    queryKey: ["businesses"],
+    queryFn: async () => {
+      try {
+        const res = await axios.get(
+          `http://${process.env.EXPO_PUBLIC_URL}:8080/fetchBusinesses`
+        );
+
+        return res.data;
+      } catch (error) {
+        console.log(error);
+      }
+    },
+  });
+
   return (
     <View style={{ flex: 1 }}>
       <MapView
@@ -46,8 +75,8 @@ const GlobalMapView = ({ locations }: any) => {
       >
         {markerComponents}
       </MapView>
-      <Header />
-      <BottomDraggableDrawer />
+      <Header businesses={businesses.data} products={products.data} />
+      <BottomDraggableDrawer data={businesses} />
     </View>
   );
 };

@@ -92,8 +92,8 @@ function RootLayoutNav() {
                   <Stack.Screen name="(create)/location" />
                   <Stack.Screen name="(page)/[id]" />
                   <Stack.Screen name="(product)/[id]" />
-                  <Stack.Screen name="(cart)/cart" />
                   <Stack.Screen name="(create)/addproducts" />
+                  <Stack.Screen name="(cart)/cart" />
                 </Stack>
               </ThemeProvider>
             </View>
