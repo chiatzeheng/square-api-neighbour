@@ -28,14 +28,19 @@ The project was built using the following technologies:
 
 One of the main challenges faced during the development process was working with the Go backend. This was my first time building a backend in a language other than JavaScript/TypeScript, and Go taught me many low-level concepts that I had to experience and learn first-hand. Dealing with strict types and learning the intricacies of the language was a valuable learning experience.
 
+Towards the end my Square Checkout stopped working due to compatibility issues with Expo while i tried to migrate from S3 to Squares and Due to time constraints i was not fully able to show the whole application. However, I thoroughly enjoyed using square as even though there was a lack of documentation for React Native, I enjoyed learning and using it and believe that its a strong product.
+
 ## Accomplishments that we're proud of
+**What We Learned**
 
-[You can add your accomplishments here]
+Throughout the development journey of Neighbors, several key learnings emerged:
 
-## What we learned
+1. **Technical Proficiency**: The project provided an opportunity to deepen our understanding and proficiency in a diverse range of technologies, from backend development using Go to leveraging cutting-edge AI models for generating 3D content.
+2. 
+3. **User-Centric Design**: Crafting a seamless user experience was paramount in Neighbors' development. This endeavor reinforced the importance of empathizing with users' needs and preferences, driving our focus towards user-centric design principles.
 
-[You can add what you learned during the project here]
+**What's Next for Neighbors**
 
-## What's next for Neighbours
+Looking ahead, the journey for Neighbors is brimming with exciting possibilities:
 
-[You can add your future plans for the project here]
+1. **Expansion and Scaling**: Usage of Square's Inventory API to replace S3
