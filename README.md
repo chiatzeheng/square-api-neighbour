@@ -25,15 +25,6 @@ The project was built using the following technologies:
 - TypeScript for type safety
 
 ## Images
-![small](https://github.com/chiatzeheng/square-api-neighbour/assets/101942239/9938fa2c-9d8e-4342-88df-d894695f91fe)
-Home
-![small (1)](https://github.com/chiatzeheng/square-api-neighbour/assets/101942239/60a4f811-8ea0-4a38-b685-8480557d70f7)
-Search
-![small (2)](https://github.com/chiatzeheng/square-api-neighbour/assets/101942239/cae08079-3c62-43bd-8bbe-a256334d5db9)
-Product
-![small (3)](https://github.com/chiatzeheng/square-api-neighbour/assets/101942239/d3d1a3b1-9a63-49a5-bc8b-ed3fac3f9671)
-3D Model Created by TencentARC from 2D Images
-
 
 
 ## Challenges we ran into
